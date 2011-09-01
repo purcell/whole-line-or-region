@@ -1,14 +1,14 @@
-;;; @(#) whole-line-or-region.el -- operate on current line if region undefined
-;;; @(#) $Id: whole-line-or-region.el,v 1.3 2008/12/06 03:31:32 joe Exp $
+;;; whole-line-or-region.el --- operate on current line if region undefined
 
 ;; This file is not part of Emacs
 
 ;; Copyright (C) 2001 by Joseph L. Casadonte Jr.
-;; Author:          Joe Casadonte (emacs@northbound-train.com)
-;; Maintainer:      Joe Casadonte (emacs@northbound-train.com)
+;; Author:          Joe Casadonte <emacs@northbound-train.com>
+;; Maintainer:      Steve Purcell <steve@sanityinc.com>
 ;; Created:         July 1, 2001
 ;; Keywords:        kill yank cut copy paste whole lines
-;; Latest Version:  http://www.northbound-train.com/emacs.html
+;; Version:         1.3.1
+;; Latest Version:  https://github.com/purcell/whole-line-or-region
 
 ;; COPYRIGHT NOTICE
 
@@ -640,5 +640,3 @@ other hooks, such as major mode hooks, can do the job."
 (run-hooks 'whole-line-or-region-load-hook)
 
 ;;; whole-line-or-region.el ends here
-;;; **************************************************************************
-;;;; *****  EOF  *****  EOF  *****  EOF  *****  EOF  *****  EOF  *************
