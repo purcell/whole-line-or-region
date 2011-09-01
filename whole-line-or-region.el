@@ -556,7 +556,7 @@ is passed into FN before POST-ARGS."
 		;; add whole-line property, sometimes
 		(when mark-as-whole
 		  (let ((inhibit-read-only t))
-			(put-text-property beg (+ beg 1) 'whole-line-or-region t)
+   		    (put-text-property beg (min (point-max) (+ beg 1)) 'whole-line-or-region t)
 			(set-buffer-modified-p current-mod-state)))
 
 		(setq end (line-beginning-position (+ (or cnt 1) 1)))
@@ -582,8 +582,8 @@ is passed into FN before POST-ARGS."
 		(when mark-as-whole
 		  (let ((inhibit-read-only t)
 				(current-mod-state (buffer-modified-p)))
-			(remove-text-properties beg (+ beg 1) '(whole-line-or-region nil))
-			(set-buffer-modified-p current-mod-state)))
+		    (remove-text-properties beg (min (point-max) (+ beg 1)) '(whole-line-or-region nil))
+		    (set-buffer-modified-p current-mod-state)))
 		)
 
 	  (move-to-column saved-column))
