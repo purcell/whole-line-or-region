@@ -65,8 +65,8 @@
 ;;  just call functions `copy-region-as-kill', `kill-region',
 ;;  `kill-ring-save' and `yank' as you normally would.
 ;;
-;;  To turn the mode on automatically whenever Emacs starts, customize
-;;  `whole-line-or-region-mode' (which see).
+;;  To enable the mode for all buffers automatically whenever Emacs
+;;  starts, customize `global-whole-line-or-region-mode' (which see).
 
 ;;; Extending Package:
 ;;
@@ -185,6 +185,11 @@
   (defvar byte-compile-dynamic nil)
   (set (make-local-variable 'byte-compile-dynamic) t))
 
+;;; Keymap
+(defvar whole-line-or-region-mode-map (make-sparse-keymap)
+  "Minor mode map for `whole-line-or-region-mode'")
+
+
 ;;; **************************************************************************
 ;;; ***** version related routines
 ;;; **************************************************************************
@@ -219,18 +224,6 @@
   (customize-group "whole-line-or-region"))
 
 ;; ---------------------------------------------------------------------------
-(defcustom whole-line-or-region-mode nil
-  "Non-nil if whole-line-or-region minor mode is enabled.
-
-Setting this variable directly does not take effect; use either
-\\[customize] or the function `whole-line-or-region-mode'."
-  :set (lambda (symbol value)
-		 (whole-line-or-region-mode (or value 0)))
-  :initialize 'custom-initialize-default
-  :type 'boolean
-  :group 'whole-line-or-region)
-
-;; ---------------------------------------------------------------------------
 (defcustom whole-line-or-region-extensions-alist '(
 			   (copy-region-as-kill whole-line-or-region-copy-region-as-kill nil)
 			   (kill-region whole-line-or-region-kill-region nil)
@@ -239,11 +232,10 @@ Setting this variable directly does not take effect; use either
 			   )
   "List of functions for whole-line-or-region to swap.
 
-When whole-line-or-region is activated, all original functions will be
-replaced with their whole-line counterparts in the global keymap,
-unless the optional keymap is specified (in which case it will be
-replace in that map only).  Similarly, when whole-line-or-region is
-de-activated, the functions will be swapped back.
+When whole-line-or-region is activated, all original functions
+will be bound to their whole-line counterparts in
+`whole-line-or-region-mode-map', with the bindings taken from
+global keymap, or the optionally specified keymap.
 
 The default is to map the following:
 
@@ -260,7 +252,10 @@ your convenience:
   o `whole-line-or-region-comment-dwim-2'
 
 See the individual functions for more information on what they do and
-suggested mappings."
+suggested mappings.
+
+If you set this through other means than customize be sure to run
+`whole-line-or-region-bind-keys' afterwards"
   :type '(repeat
 		  (list :tag "Function Mappings:"
 				(function :tag "Original Function")
@@ -270,30 +265,29 @@ suggested mappings."
   :group 'whole-line-or-region
   :set (lambda (symbol newval)
 		 (set symbol newval)
-		 (when whole-line-or-region-mode
-		   (whole-line-or-region-bind-keys)))
-  )
-
-;; ---------------------------------------------------------------------------
-(defcustom whole-line-or-region-mode-line-string " WLR"
-  "String to display in mode-line when 'whole-line-or-region' is active.
-
-Must start with a space.  Changes will take effect next time emacs is
-started."
-  :type 'string
-  :group 'whole-line-or-region)
+         (whole-line-or-region-bind-keys)))
 
 ;; ---------------------------------------------------------------------------
 (defcustom whole-line-or-region-load-hook nil
   "Hook to run when package is loaded."
   :type 'hook
   :group 'whole-line-or-region)
+;;; Bind-keys function
 
 ;; ---------------------------------------------------------------------------
 (defcustom whole-line-or-region-on-hook nil
   "Hook called when 'whole-line-or-region' mode is turned on."
   :type 'hook
   :group 'whole-line-or-region)
+;;;###autoload
+(defun whole-line-or-region-bind-keys ()
+  "Bind keys according to `whole-line-or-region-extensions-alist'."
+  (dolist (elem whole-line-or-region-extensions-alist)
+    (substitute-key-definition
+     (nth 0 elem)
+     (nth 1 elem)
+     whole-line-or-region-mode-map
+     (or (nth 2 elem) (current-global-map)))))
 
 ;; ---------------------------------------------------------------------------
 (defcustom whole-line-or-region-off-hook nil
@@ -304,11 +298,10 @@ started."
 ;;; **************************************************************************
 ;;; ***** minor mode functions
 ;;; **************************************************************************
-; (defvar whole-line-or-region-mode nil )
 
 ;;; --------------------------------------------------------------------------
 ;;;###autoload
-(defun whole-line-or-region-mode (&optional arg)
+(define-minor-mode whole-line-or-region-mode
   "Toggle use of whole-line-or-region minor mode.
 
 This minor mode allows functions to operate on the current line if
@@ -316,34 +309,25 @@ they would normally operate on a region and region is currently
 undefined.
 
 Optional ARG turns mode on iff ARG is a positive integer."
-  (interactive "P")
 
-  ;; toggle on and off
-  (let ((old-mode whole-line-or-region-mode))
-	(setq whole-line-or-region-mode
-		  (if arg (or (listp arg)
-					  (> (prefix-numeric-value arg) 0))
-			(not whole-line-or-region-mode)))
+  :group 'whole-line-or-region
+  :lighter " WLR"
+  :keymap 'whole-line-or-region-mode-map
+  ;; FIXME, this is non-standard, as there is already a
+  ;; whole-line-or-region-mode-hook defined by define-minor-mode
+  ;; Should it be kept for backwards compatibility?
+  (run-hooks (if whole-line-or-region-mode 
+                 'whole-line-or-region-on-hook
+               'whole-line-or-region-off-hook)))
 
-	(when (not (equal old-mode whole-line-or-region-mode))
-	  ;; enable/disable advice
-	  (if whole-line-or-region-mode
-		  (whole-line-or-region-bind-keys)
-		(whole-line-or-region-restore-keys))
+;;;###autoload
+(define-globalized-minor-mode global-whole-line-or-region-mode
+  whole-line-or-region-mode
+  whole-line-or-region--turn-on
+  :group 'whole-line-or-region)
 
-	  (run-hooks (if whole-line-or-region-mode
-					 'whole-line-or-region-on-hook
-				   'whole-line-or-region-off-hook))
-	  )))
-
-;; ---------------------------------------------------------------------------
-;; add to minor-mode-alist if not there already
-(or
- (assq 'whole-line-or-region-mode minor-mode-alist)
- (setq minor-mode-alist
-	   (cons
-		(list 'whole-line-or-region-mode whole-line-or-region-mode-line-string)
-		minor-mode-alist)))
+(defun whole-line-or-region--turn-on ()
+  (whole-line-or-region-mode +1))
 
 ;;; **************************************************************************
 ;;; ***** interactive functions (used by default)
@@ -590,32 +574,6 @@ is passed into FN before POST-ARGS."
 	))
 
 ;;; **************************************************************************
-(defun whole-line-or-region-bind-keys (&optional switch)
-  "Bind keys according to `whole-line-or-region-extensions-alist'.
-
-With optional SWITCH, restore keys instead."
-  (let ((gmap (current-global-map))
-		(ext-alist whole-line-or-region-extensions-alist)
-		elem orig wlr map)
-	(while ext-alist
-	  (setq elem (car ext-alist))
-	  (setq ext-alist (cdr ext-alist))
-
-	  (setq orig (nth 0 elem))
-	  (setq wlr (nth 1 elem))
-	  (setq map (nth 2 elem))
-
-	  (if switch
-		  (substitute-key-definition wlr orig (or map gmap))
-		(substitute-key-definition orig wlr (or map gmap)))
-	  )))
-
-;;; **************************************************************************
-(defun whole-line-or-region-restore-keys ()
-  "Restore keys according to `whole-line-or-region-extensions-alist'."
-  (whole-line-or-region-bind-keys t))
-
-;;; **************************************************************************
 (defun whole-line-or-region-append-to-list (list-var element)
 	"Add to the value of LIST-VAR the element ELEMENT if it isn't there yet.
 
@@ -636,6 +594,10 @@ other hooks, such as major mode hooks, can do the job."
 ;;; **************************************************************************
 ;;; ***** we're done
 ;;; **************************************************************************
+
+;; FIXME, is just running it here once the reasonable thing to do?
+(whole-line-or-region-bind-keys)
+
 (provide 'whole-line-or-region)
 (run-hooks 'whole-line-or-region-load-hook)
 
