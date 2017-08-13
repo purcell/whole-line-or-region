@@ -6,17 +6,15 @@
 ;; Author:          Joe Casadonte <emacs@northbound-train.com>
 ;; Maintainer:      Steve Purcell <steve@sanityinc.com>
 ;; Created:         July 1, 2001
-;; Modified:        August 11, 2017
+;; Modified:        August 13, 2017
 ;; Keywords:        convenience wp
 ;; Version:         1.3.1
 ;; Latest Version:  https://github.com/purcell/whole-line-or-region
 
-;; COPYRIGHT NOTICE
-
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
 ;; This program is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,9 +22,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-;; Boston, MA 02111-1307, USA.
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -275,7 +271,7 @@ Optional ARG turns mode on iff ARG is a positive integer."
   :keymap 'whole-line-or-region-mode-map)
 
 ;;;###autoload
-(define-globalized-minor-mode global-whole-line-or-region-mode
+(define-globalized-minor-mode whole-line-or-region-global-mode
   whole-line-or-region-mode
   whole-line-or-region--turn-on
   :group 'whole-line-or-region)
