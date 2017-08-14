@@ -197,11 +197,11 @@
 
 ;; ---------------------------------------------------------------------------
 (defcustom whole-line-or-region-extensions-alist '(
-			   (copy-region-as-kill whole-line-or-region-copy-region-as-kill nil)
-			   (kill-region whole-line-or-region-kill-region nil)
-			   (kill-ring-save whole-line-or-region-kill-ring-save nil)
-			   (yank whole-line-or-region-yank nil)
-			   )
+                                                   (copy-region-as-kill whole-line-or-region-copy-region-as-kill nil)
+                                                   (kill-region whole-line-or-region-kill-region nil)
+                                                   (kill-ring-save whole-line-or-region-kill-ring-save nil)
+                                                   (yank whole-line-or-region-yank nil)
+                                                   )
   "List of functions for whole-line-or-region to swap.
 
 When whole-line-or-region is activated, all original functions
@@ -229,14 +229,14 @@ suggested mappings.
 If you set this through other means than customize be sure to run
 `whole-line-or-region-bind-keys' afterwards"
   :type '(repeat
-		  (list :tag "Function Mappings:"
-				(function :tag "Original Function")
-				(function :tag "Whole-line Version")
-				(variable :tag "Keymap (optional)")
-				))
+          (list :tag "Function Mappings:"
+                (function :tag "Original Function")
+                (function :tag "Whole-line Version")
+                (variable :tag "Keymap (optional)")
+                ))
   :group 'whole-line-or-region
   :set (lambda (symbol newval)
-		 (set symbol newval)
+         (set symbol newval)
          (whole-line-or-region-bind-keys)))
 
 
@@ -323,48 +323,48 @@ Optionally, pass in string to be \"yanked\" via STRING-IN."
 
   ;; figure out what yank would do normally
   (let ((string-to-yank (or string-in (current-kill
-									   (cond ((listp raw-prefix) 0)
-											 ((eq raw-prefix '-) -1)
-											 (t (1- raw-prefix))) t)))
-		(saved-column (current-column)))
+                                       (cond ((listp raw-prefix) 0)
+                                             ((eq raw-prefix '-) -1)
+                                             (t (1- raw-prefix))) t)))
+        (saved-column (current-column)))
 
-	;; check for whole-line prop in yanked text
-	(if (get-text-property 0 'whole-line-or-region string-to-yank)
-		(let ((beg (line-beginning-position)))
-		  ;; goto beg of line and yank
-		  (beginning-of-line)
-		  (if string-in
-			  ;; insert "manually"
-			  (insert string-in)
-			;; just yank as normal
-			(yank raw-prefix))
+    ;; check for whole-line prop in yanked text
+    (if (get-text-property 0 'whole-line-or-region string-to-yank)
+        (let ((beg (line-beginning-position)))
+          ;; goto beg of line and yank
+          (beginning-of-line)
+          (if string-in
+              ;; insert "manually"
+              (insert string-in)
+            ;; just yank as normal
+            (yank raw-prefix))
 
-		  ;; a whole-line killed from end of file may not have a
-		  ;; trailing newline -- add one, in these cases
-		  (when (not (string-match "\n$" string-to-yank))
-			(insert "\n")
-			(forward-line -1))
+          ;; a whole-line killed from end of file may not have a
+          ;; trailing newline -- add one, in these cases
+          (when (not (string-match "\n$" string-to-yank))
+            (insert "\n")
+            (forward-line -1))
 
-		  ;; restore state of being....
-		  (move-to-column saved-column)
-		  (remove-text-properties beg (+ beg 1) '(whole-line-or-region nil)))
+          ;; restore state of being....
+          (move-to-column saved-column)
+          (remove-text-properties beg (+ beg 1) '(whole-line-or-region nil)))
 
-	  ;; no whole-line-or-region mark
-	  (if string-in
-		  ;; insert "manually"
-		  (progn
-			(when (and delete-selection-mode
-					   mark-active)
-			  (delete-active-region))
-			(insert string-in))
-	  ;; just yank as normal
-	  (yank raw-prefix)))
-	))
+      ;; no whole-line-or-region mark
+      (if string-in
+          ;; insert "manually"
+          (progn
+            (when (and delete-selection-mode
+                       mark-active)
+              (delete-active-region))
+            (insert string-in))
+        ;; just yank as normal
+        (yank raw-prefix)))
+    ))
 
 ;;; --------------------------------------------------------------------------
 ;; in case delete-selection-mode (delsel.el) is being used
 (if (string-match "Emacs 21" (emacs-version))
-	(put 'whole-line-or-region-yank 'delete-selection 'yank)
+    (put 'whole-line-or-region-yank 'delete-selection 'yank)
   (put 'whole-line-or-region-yank 'delete-selection t))
 
 ;;; **************************************************************************
@@ -437,8 +437,8 @@ FN as the sole argument."
 
 ;;; **************************************************************************
 (defun whole-line-or-region-base-call (norm-fn wlr-fn
-									   &optional beg-end pre-args post-args
-									   cnt mark-as-whole send-prefix prefix)
+                                               &optional beg-end pre-args post-args
+                                               cnt mark-as-whole send-prefix prefix)
   "Calls FN on region or CNT whole lines.
 
 If region is defined simply call NORM-FN.
@@ -462,67 +462,67 @@ is passed into FN before POST-ARGS."
 
   ;; region is defined, so just do what should normally be done
   (if (and mark-active
-		   (/= (point) (mark)))
-	  ;; just call it, but make sure to pass all of the arguments....
-	  (let (args)
-		(when pre-args
-		  (add-to-list 'args pre-args))
+           (/= (point) (mark)))
+      ;; just call it, but make sure to pass all of the arguments....
+      (let (args)
+        (when pre-args
+          (add-to-list 'args pre-args))
 
-		(when beg-end
-		  (add-to-list 'args (point))
-		  (add-to-list 'args (mark)))
+        (when beg-end
+          (add-to-list 'args (point))
+          (add-to-list 'args (mark)))
 
-		(when send-prefix
-		  (add-to-list 'args (list prefix)))
+        (when send-prefix
+          (add-to-list 'args (list prefix)))
 
-		(when post-args
-		  (add-to-list 'args post-args))
+        (when post-args
+          (add-to-list 'args post-args))
 
-		(apply 'funcall norm-fn args))
+        (apply 'funcall norm-fn args))
 
-	;; no region defined, act on whole line
-	(let ((saved-column (current-column))
-		  (current-mod-state (buffer-modified-p))
-		  beg end)
-	  (save-excursion
-		(setq beg (line-beginning-position))
-		(set-mark beg)
+    ;; no region defined, act on whole line
+    (let ((saved-column (current-column))
+          (current-mod-state (buffer-modified-p))
+          beg end)
+      (save-excursion
+        (setq beg (line-beginning-position))
+        (set-mark beg)
 
-		;; add whole-line property, sometimes
-		(when mark-as-whole
-		  (let ((inhibit-read-only t))
-   		    (put-text-property beg (min (point-max) (+ beg 1)) 'whole-line-or-region t)
-			(set-buffer-modified-p current-mod-state)))
+        ;; add whole-line property, sometimes
+        (when mark-as-whole
+          (let ((inhibit-read-only t))
+            (put-text-property beg (min (point-max) (+ beg 1)) 'whole-line-or-region t)
+            (set-buffer-modified-p current-mod-state)))
 
-		(setq end (line-beginning-position (+ (or cnt 1) 1)))
-		(goto-char end)
+        (setq end (line-beginning-position (+ (or cnt 1) 1)))
+        (goto-char end)
 
-		(let (args)
-		  (when pre-args
-			(add-to-list 'args pre-args))
+        (let (args)
+          (when pre-args
+            (add-to-list 'args pre-args))
 
-		  (when beg-end
-			(add-to-list 'args beg)
-			(add-to-list 'args end))
+          (when beg-end
+            (add-to-list 'args beg)
+            (add-to-list 'args end))
 
-		  (when send-prefix
-			(add-to-list 'args (list prefix)))
+          (when send-prefix
+            (add-to-list 'args (list prefix)))
 
-		  (when post-args
-			(add-to-list 'args post-args))
+          (when post-args
+            (add-to-list 'args post-args))
 
-		  (apply 'funcall wlr-fn args))
+          (apply 'funcall wlr-fn args))
 
-		;; remove whole-line property, sometimes
-		(when mark-as-whole
-		  (let ((inhibit-read-only t)
-				(current-mod-state (buffer-modified-p)))
-		    (remove-text-properties beg (min (point-max) (+ beg 1)) '(whole-line-or-region nil))
-		    (set-buffer-modified-p current-mod-state)))
-		)
+        ;; remove whole-line property, sometimes
+        (when mark-as-whole
+          (let ((inhibit-read-only t)
+                (current-mod-state (buffer-modified-p)))
+            (remove-text-properties beg (min (point-max) (+ beg 1)) '(whole-line-or-region nil))
+            (set-buffer-modified-p current-mod-state)))
+        )
 
-	  (move-to-column saved-column))
-	))
+      (move-to-column saved-column))
+    ))
 
 ;;; **************************************************************************
 ;;; ***** we're done
