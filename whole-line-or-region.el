@@ -54,15 +54,15 @@
 
 ;;; Usage:
 ;;
-;;  M-x `whole-line-or-region-mode'
+;;  M-x `whole-line-or-region-local-mode'
 
-;;  Toggles whole-line-or-region-mode on & off.  Optional arg turns
-;;  whole-line-or-region-mode on iff arg is a positive integer.  Then
-;;  just call functions `copy-region-as-kill', `kill-region',
-;;  `kill-ring-save' and `yank' as you normally would.
+;;  Toggles whole-line-or-region-mode on & off on a per-buffer basis.
+;;  Optional arg turns whole-line-or-region-mode on iff arg is a
+;;  positive integer.  Then just call functions `copy-region-as-kill',
+;;  `kill-region', `kill-ring-save' and `yank' as you normally would.
 ;;
 ;;  To enable the mode for all buffers automatically whenever Emacs
-;;  starts, customize `global-whole-line-or-region-mode' (which see).
+;;  starts, customize `whole-line-or-region-global-mode' (which see).
 
 ;;; Extending Package:
 ;;
@@ -271,10 +271,13 @@ Optional ARG turns mode on iff ARG is a positive integer."
   :keymap 'whole-line-or-region-mode-map)
 
 ;;;###autoload
-(define-globalized-minor-mode whole-line-or-region-mode
+(define-globalized-minor-mode whole-line-or-region-global-mode
   whole-line-or-region-local-mode
   whole-line-or-region--turn-on
   :group 'whole-line-or-region)
+
+;;;###autoload
+(define-obsolete-function-alias 'whole-line-or-region-mode 'whole-line-or-region-global-mode)
 
 (defun whole-line-or-region--turn-on ()
   (whole-line-or-region-local-mode +1))
