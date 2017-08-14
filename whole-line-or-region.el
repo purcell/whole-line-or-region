@@ -365,9 +365,7 @@ Optionally, pass in string to be \"yanked\" via STRING-IN."
 
 ;;; --------------------------------------------------------------------------
 ;; in case delete-selection-mode (delsel.el) is being used
-(if (string-match "Emacs 21" (emacs-version))
-    (put 'whole-line-or-region-yank 'delete-selection 'yank)
-  (put 'whole-line-or-region-yank 'delete-selection t))
+(put 'whole-line-or-region-yank 'delete-selection t)
 
 ;;; **************************************************************************
 ;;; alternate interactive functions
