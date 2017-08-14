@@ -6,16 +6,15 @@
 ;; Author:          Joe Casadonte <emacs@northbound-train.com>
 ;; Maintainer:      Steve Purcell <steve@sanityinc.com>
 ;; Created:         July 1, 2001
-;; Keywords:        kill yank cut copy paste whole lines
+;; Modified:        August 13, 2017
+;; Keywords:        convenience wp
 ;; Version:         1.3.1
 ;; Latest Version:  https://github.com/purcell/whole-line-or-region
 
-;; COPYRIGHT NOTICE
-
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
 ;; This program is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,9 +22,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-;; Boston, MA 02111-1307, USA.
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -65,8 +62,8 @@
 ;;  just call functions `copy-region-as-kill', `kill-region',
 ;;  `kill-ring-save' and `yank' as you normally would.
 ;;
-;;  To turn the mode on automatically whenever Emacs starts, customize
-;;  `whole-line-or-region-mode' (which see).
+;;  To enable the mode for all buffers automatically whenever Emacs
+;;  starts, customize `global-whole-line-or-region-mode' (which see).
 
 ;;; Extending Package:
 ;;
@@ -180,29 +177,20 @@
 ;;; **************************************************************************
 ;;; Code:
 
-(eval-when-compile
-  ;; silence the old byte-compiler
-  (defvar byte-compile-dynamic nil)
-  (set (make-local-variable 'byte-compile-dynamic) t))
+;;; Keymap
+(defvar whole-line-or-region-mode-map (make-sparse-keymap)
+  "Minor mode map for `whole-line-or-region-mode'")
 
-;;; **************************************************************************
-;;; ***** version related routines
-;;; **************************************************************************
-(defconst whole-line-or-region-version
-  "$Revision: 1.3 $"
-  "Version number for 'whole-line-or-region' package.")
+;;;###autoload
+(defun whole-line-or-region-bind-keys ()
+  "Bind keys according to `whole-line-or-region-extensions-alist'."
+  (dolist (elem whole-line-or-region-extensions-alist)
+    (substitute-key-definition
+     (nth 0 elem)
+     (nth 1 elem)
+     whole-line-or-region-mode-map
+     (or (nth 2 elem) (current-global-map)))))
 
-;; ---------------------------------------------------------------------------
-(defun whole-line-or-region-version-number ()
-  "Return 'whole-line-or-region' version number."
-  (string-match "[0123456789.]+" whole-line-or-region-version)
-  (match-string 0 whole-line-or-region-version))
-
-;; ---------------------------------------------------------------------------
-(defun whole-line-or-region-display-version ()
-  "Display 'whole-line-or-region' version."
-  (interactive)
-  (message "whole-line-or-region version <%s>." (whole-line-or-region-version-number)))
 
 ;;; **************************************************************************
 ;;; ***** customization
@@ -219,18 +207,6 @@
   (customize-group "whole-line-or-region"))
 
 ;; ---------------------------------------------------------------------------
-(defcustom whole-line-or-region-mode nil
-  "Non-nil if whole-line-or-region minor mode is enabled.
-
-Setting this variable directly does not take effect; use either
-\\[customize] or the function `whole-line-or-region-mode'."
-  :set (lambda (symbol value)
-		 (whole-line-or-region-mode (or value 0)))
-  :initialize 'custom-initialize-default
-  :type 'boolean
-  :group 'whole-line-or-region)
-
-;; ---------------------------------------------------------------------------
 (defcustom whole-line-or-region-extensions-alist '(
 			   (copy-region-as-kill whole-line-or-region-copy-region-as-kill nil)
 			   (kill-region whole-line-or-region-kill-region nil)
@@ -239,11 +215,10 @@ Setting this variable directly does not take effect; use either
 			   )
   "List of functions for whole-line-or-region to swap.
 
-When whole-line-or-region is activated, all original functions will be
-replaced with their whole-line counterparts in the global keymap,
-unless the optional keymap is specified (in which case it will be
-replace in that map only).  Similarly, when whole-line-or-region is
-de-activated, the functions will be swapped back.
+When whole-line-or-region is activated, all original functions
+will be bound to their whole-line counterparts in
+`whole-line-or-region-mode-map', with the bindings taken from
+global keymap, or the optionally specified keymap.
 
 The default is to map the following:
 
@@ -260,7 +235,10 @@ your convenience:
   o `whole-line-or-region-comment-dwim-2'
 
 See the individual functions for more information on what they do and
-suggested mappings."
+suggested mappings.
+
+If you set this through other means than customize be sure to run
+`whole-line-or-region-bind-keys' afterwards"
   :type '(repeat
 		  (list :tag "Function Mappings:"
 				(function :tag "Original Function")
@@ -270,45 +248,17 @@ suggested mappings."
   :group 'whole-line-or-region
   :set (lambda (symbol newval)
 		 (set symbol newval)
-		 (when whole-line-or-region-mode
-		   (whole-line-or-region-bind-keys)))
-  )
+         (whole-line-or-region-bind-keys)))
 
 ;; ---------------------------------------------------------------------------
-(defcustom whole-line-or-region-mode-line-string " WLR"
-  "String to display in mode-line when 'whole-line-or-region' is active.
-
-Must start with a space.  Changes will take effect next time emacs is
-started."
-  :type 'string
-  :group 'whole-line-or-region)
-
-;; ---------------------------------------------------------------------------
-(defcustom whole-line-or-region-load-hook nil
-  "Hook to run when package is loaded."
-  :type 'hook
-  :group 'whole-line-or-region)
-
-;; ---------------------------------------------------------------------------
-(defcustom whole-line-or-region-on-hook nil
-  "Hook called when 'whole-line-or-region' mode is turned on."
-  :type 'hook
-  :group 'whole-line-or-region)
-
-;; ---------------------------------------------------------------------------
-(defcustom whole-line-or-region-off-hook nil
-  "Hook called when 'whole-line-or-region' mode is turned off."
-  :type 'hook
-  :group 'whole-line-or-region)
 
 ;;; **************************************************************************
-;;; ***** minor mode functions
+;;; ***** minor mode definitions
 ;;; **************************************************************************
-; (defvar whole-line-or-region-mode nil )
 
 ;;; --------------------------------------------------------------------------
 ;;;###autoload
-(defun whole-line-or-region-mode (&optional arg)
+(define-minor-mode whole-line-or-region-mode
   "Toggle use of whole-line-or-region minor mode.
 
 This minor mode allows functions to operate on the current line if
@@ -316,34 +266,18 @@ they would normally operate on a region and region is currently
 undefined.
 
 Optional ARG turns mode on iff ARG is a positive integer."
-  (interactive "P")
+  :group 'whole-line-or-region
+  :lighter " WLR"
+  :keymap 'whole-line-or-region-mode-map)
 
-  ;; toggle on and off
-  (let ((old-mode whole-line-or-region-mode))
-	(setq whole-line-or-region-mode
-		  (if arg (or (listp arg)
-					  (> (prefix-numeric-value arg) 0))
-			(not whole-line-or-region-mode)))
+;;;###autoload
+(define-globalized-minor-mode whole-line-or-region-global-mode
+  whole-line-or-region-mode
+  whole-line-or-region--turn-on
+  :group 'whole-line-or-region)
 
-	(when (not (equal old-mode whole-line-or-region-mode))
-	  ;; enable/disable advice
-	  (if whole-line-or-region-mode
-		  (whole-line-or-region-bind-keys)
-		(whole-line-or-region-restore-keys))
-
-	  (run-hooks (if whole-line-or-region-mode
-					 'whole-line-or-region-on-hook
-				   'whole-line-or-region-off-hook))
-	  )))
-
-;; ---------------------------------------------------------------------------
-;; add to minor-mode-alist if not there already
-(or
- (assq 'whole-line-or-region-mode minor-mode-alist)
- (setq minor-mode-alist
-	   (cons
-		(list 'whole-line-or-region-mode whole-line-or-region-mode-line-string)
-		minor-mode-alist)))
+(defun whole-line-or-region--turn-on ()
+  (whole-line-or-region-mode +1))
 
 ;;; **************************************************************************
 ;;; ***** interactive functions (used by default)
@@ -408,7 +342,7 @@ Optionally, pass in string to be \"yanked\" via STRING-IN."
 		  ;; trailing newline -- add one, in these cases
 		  (when (not (string-match "\n$" string-to-yank))
 			(insert "\n")
-			(previous-line 1))
+			(forward-line -1))
 
 		  ;; restore state of being....
 		  (move-to-column saved-column)
@@ -531,17 +465,17 @@ is passed into FN before POST-ARGS."
 	  ;; just call it, but make sure to pass all of the arguments....
 	  (let (args)
 		(when pre-args
-		  (whole-line-or-region-append-to-list 'args pre-args))
+		  (add-to-list 'args pre-args))
 
 		(when beg-end
-		  (whole-line-or-region-append-to-list 'args (point))
-		  (whole-line-or-region-append-to-list 'args (mark)))
+		  (add-to-list 'args (point))
+		  (add-to-list 'args (mark)))
 
 		(when send-prefix
-		  (whole-line-or-region-append-to-list 'args (list prefix)))
+		  (add-to-list 'args (list prefix)))
 
 		(when post-args
-		  (whole-line-or-region-append-to-list 'args post-args))
+		  (add-to-list 'args post-args))
 
 		(apply 'funcall norm-fn args))
 
@@ -564,17 +498,17 @@ is passed into FN before POST-ARGS."
 
 		(let (args)
 		  (when pre-args
-			(whole-line-or-region-append-to-list 'args pre-args))
+			(add-to-list 'args pre-args))
 
 		  (when beg-end
-			(whole-line-or-region-append-to-list 'args beg)
-			(whole-line-or-region-append-to-list 'args end))
+			(add-to-list 'args beg)
+			(add-to-list 'args end))
 
 		  (when send-prefix
-			(whole-line-or-region-append-to-list 'args (list prefix)))
+			(add-to-list 'args (list prefix)))
 
 		  (when post-args
-			(whole-line-or-region-append-to-list 'args post-args))
+			(add-to-list 'args post-args))
 
 		  (apply 'funcall wlr-fn args))
 
@@ -590,53 +524,12 @@ is passed into FN before POST-ARGS."
 	))
 
 ;;; **************************************************************************
-(defun whole-line-or-region-bind-keys (&optional switch)
-  "Bind keys according to `whole-line-or-region-extensions-alist'.
-
-With optional SWITCH, restore keys instead."
-  (let ((gmap (current-global-map))
-		(ext-alist whole-line-or-region-extensions-alist)
-		elem orig wlr map)
-	(while ext-alist
-	  (setq elem (car ext-alist))
-	  (setq ext-alist (cdr ext-alist))
-
-	  (setq orig (nth 0 elem))
-	  (setq wlr (nth 1 elem))
-	  (setq map (nth 2 elem))
-
-	  (if switch
-		  (substitute-key-definition wlr orig (or map gmap))
-		(substitute-key-definition orig wlr (or map gmap)))
-	  )))
-
-;;; **************************************************************************
-(defun whole-line-or-region-restore-keys ()
-  "Restore keys according to `whole-line-or-region-extensions-alist'."
-  (whole-line-or-region-bind-keys t))
-
-;;; **************************************************************************
-(defun whole-line-or-region-append-to-list (list-var element)
-	"Add to the value of LIST-VAR the element ELEMENT if it isn't there yet.
-
-The test for presence of ELEMENT is done with `equal'.
-If ELEMENT is added, it is added at the beginning of the list,
-unless the optional argument APPEND is non-nil, in which case
-ELEMENT is added at the end.
-
-If you want to use `whole-line-or-region-append-to-list' on a variable that is not defined
-until a certain package is loaded, you should put the call to `whole-line-or-region-append-to-list'
-into a hook function that will be run only after loading the package.
-`eval-after-load' provides one way to do this.  In some cases
-other hooks, such as major mode hooks, can do the job."
-	(set list-var
-		 (append (symbol-value list-var) (if (listp element) element (list element)))
-		 ))
-
-;;; **************************************************************************
 ;;; ***** we're done
 ;;; **************************************************************************
+
+;; FIXME, is just running it here once the reasonable thing to do?
+(whole-line-or-region-bind-keys)
+
 (provide 'whole-line-or-region)
-(run-hooks 'whole-line-or-region-load-hook)
 
 ;;; whole-line-or-region.el ends here
