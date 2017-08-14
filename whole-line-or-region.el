@@ -6,9 +6,8 @@
 ;; Author:          Joe Casadonte <emacs@northbound-train.com>
 ;; Maintainer:      Steve Purcell <steve@sanityinc.com>
 ;; Created:         July 1, 2001
-;; Modified:        August 13, 2017
 ;; Keywords:        convenience wp
-;; Version:         1.3.1
+;; Package-Version: 0
 ;; Latest Version:  https://github.com/purcell/whole-line-or-region
 
 ;; This program is free software; you can redistribute it and/or modify
