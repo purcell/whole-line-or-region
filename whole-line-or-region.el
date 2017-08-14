@@ -258,7 +258,7 @@ If you set this through other means than customize be sure to run
 
 ;;; --------------------------------------------------------------------------
 ;;;###autoload
-(define-minor-mode whole-line-or-region-mode
+(define-minor-mode whole-line-or-region-local-mode
   "Toggle use of whole-line-or-region minor mode.
 
 This minor mode allows functions to operate on the current line if
@@ -271,13 +271,13 @@ Optional ARG turns mode on iff ARG is a positive integer."
   :keymap 'whole-line-or-region-mode-map)
 
 ;;;###autoload
-(define-globalized-minor-mode whole-line-or-region-global-mode
-  whole-line-or-region-mode
+(define-globalized-minor-mode whole-line-or-region-mode
+  whole-line-or-region-local-mode
   whole-line-or-region--turn-on
   :group 'whole-line-or-region)
 
 (defun whole-line-or-region--turn-on ()
-  (whole-line-or-region-mode +1))
+  (whole-line-or-region-local-mode +1))
 
 ;;; **************************************************************************
 ;;; ***** interactive functions (used by default)
