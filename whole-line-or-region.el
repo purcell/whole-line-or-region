@@ -179,18 +179,7 @@
 
 ;;; Keymap
 (defvar whole-line-or-region-mode-map (make-sparse-keymap)
-  "Minor mode map for `whole-line-or-region-mode'")
-
-;;;###autoload
-(defun whole-line-or-region-bind-keys ()
-  "Bind keys according to `whole-line-or-region-extensions-alist'."
-  (dolist (elem whole-line-or-region-extensions-alist)
-    (substitute-key-definition
-     (nth 0 elem)
-     (nth 1 elem)
-     whole-line-or-region-mode-map
-     (or (nth 2 elem) (current-global-map)))))
-
+  "Minor mode map for `whole-line-or-region-mode'.")
 
 ;;; **************************************************************************
 ;;; ***** customization
@@ -249,6 +238,18 @@ If you set this through other means than customize be sure to run
   :set (lambda (symbol newval)
 		 (set symbol newval)
          (whole-line-or-region-bind-keys)))
+
+
+;;;###autoload
+(defun whole-line-or-region-bind-keys ()
+  "Bind keys according to `whole-line-or-region-extensions-alist'."
+  (dolist (elem whole-line-or-region-extensions-alist)
+    (substitute-key-definition
+     (nth 0 elem)
+     (nth 1 elem)
+     whole-line-or-region-mode-map
+     (or (nth 2 elem) (current-global-map)))))
+
 
 ;; ---------------------------------------------------------------------------
 
