@@ -156,24 +156,6 @@
 ;;
 ;;  o Nothing, at the moment.
 
-;;; Comments:
-;;
-;;  Any comments, suggestions, bug reports or upgrade requests are welcome.
-;;  Please send them to Joe Casadonte (emacs@northbound-train.com).
-;;
-;;  This version of whole-line-or-region was developed and tested with NTEmacs
-;;  22.2.1 under Windows XP Pro.  Please, let me know if it works with
-;;  other OS and versions of Emacs.
-
-;;; Change Log:
-;;
-;;  see http://www.northbound-train.com/emacs/whole-line-or-region.log
-
-;;; **************************************************************************
-;;; **************************************************************************
-;;; **************************************************************************
-;;; **************************************************************************
-;;; **************************************************************************
 ;;; Code:
 
 ;;; Keymap
@@ -253,7 +235,6 @@ If you set this through other means than customize be sure to run
 ;;; ***** minor mode definitions
 ;;; **************************************************************************
 
-;;; --------------------------------------------------------------------------
 ;;;###autoload
 (define-minor-mode whole-line-or-region-local-mode
   "Toggle use of whole-line-or-region minor mode.
@@ -288,24 +269,18 @@ Optional ARG turns mode on iff ARG is a positive integer."
   (interactive "p")
   (whole-line-or-region-call-with-region 'copy-region-as-kill prefix t))
 
-;;; --------------------------------------------------------------------------
-;; (defalias 'whole-line-or-region-copy 'whole-line-or-region-copy-region-as-kill)
-
-;;; **************************************************************************
 ;;;###autoload
 (defun whole-line-or-region-kill-region (prefix)
   "Kill (cut) region or PREFIX whole lines."
   (interactive "*p")
   (whole-line-or-region-call-with-region 'kill-region prefix t))
 
-;;; **************************************************************************
 ;;;###autoload
 (defun whole-line-or-region-kill-ring-save (prefix)
   "Copy region or PREFIX whole lines."
   (interactive "p")
   (whole-line-or-region-call-with-region 'kill-ring-save prefix t))
 
-;;; **************************************************************************
 ;;;###autoload
 (defun whole-line-or-region-yank (raw-prefix &optional string-in)
   "Yank (paste) previously killed text.
@@ -360,7 +335,6 @@ Optionally, pass in string to be \"yanked\" via STRING-IN."
         (yank raw-prefix)))
     ))
 
-;;; --------------------------------------------------------------------------
 ;; in case delete-selection-mode (delsel.el) is being used
 (put 'whole-line-or-region-yank 'delete-selection t)
 
@@ -373,7 +347,6 @@ Optionally, pass in string to be \"yanked\" via STRING-IN."
   (interactive "*p")
   (whole-line-or-region-call-with-region 'delete-region prefix))
 
-;;; **************************************************************************
 ;;;###autoload
 (defun whole-line-or-region-comment-dwim (raw-prefix)
   "Call `comment-dwim' on current region or current line.
@@ -382,7 +355,6 @@ See `comment-dwim' for details of RAW-PREFIX usage."
   (interactive "*P")
   (whole-line-or-region-call-with-prefix 'comment-dwim 1 nil t raw-prefix))
 
-;;; **************************************************************************
 ;;;###autoload
 (defun whole-line-or-region-comment-dwim-2 (prefix)
   "Call `comment-dwim' on region or PREFIX whole lines."
@@ -412,7 +384,6 @@ In either case, if SEND-PREFIX is non-nil, then PREFIX is passed into
 FN as a third argument."
   (whole-line-or-region-base-call fn fn t nil nil cnt mark-as-whole send-prefix prefix))
 
-;;; **************************************************************************
 (defun whole-line-or-region-call-with-prefix (fn &optional cnt mark-as-whole send-prefix prefix)
   "Calls FN on region or CNT whole lines.
 
@@ -432,7 +403,6 @@ In either case, if SEND-PREFIX is non-nil, then PREFIX is passed into
 FN as the sole argument."
   (whole-line-or-region-base-call fn fn nil nil nil cnt mark-as-whole send-prefix prefix))
 
-;;; **************************************************************************
 (defun whole-line-or-region-base-call (norm-fn wlr-fn
                                                &optional beg-end pre-args post-args
                                                cnt mark-as-whole send-prefix prefix)
@@ -521,9 +491,6 @@ is passed into FN before POST-ARGS."
       (move-to-column saved-column))
     ))
 
-;;; **************************************************************************
-;;; ***** we're done
-;;; **************************************************************************
 
 ;; FIXME, is just running it here once the reasonable thing to do?
 (whole-line-or-region-bind-keys)
