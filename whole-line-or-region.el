@@ -177,7 +177,7 @@
 ;;; Code:
 
 ;;; Keymap
-(defvar whole-line-or-region-mode-map (make-sparse-keymap)
+(defvar whole-line-or-region-local-mode-map (make-sparse-keymap)
   "Minor mode map for `whole-line-or-region-mode'.")
 
 ;;; **************************************************************************
@@ -195,17 +195,28 @@
   (customize-group "whole-line-or-region"))
 
 ;; ---------------------------------------------------------------------------
-(defcustom whole-line-or-region-extensions-alist '(
-                                                   (copy-region-as-kill whole-line-or-region-copy-region-as-kill nil)
-                                                   (kill-region whole-line-or-region-kill-region nil)
-                                                   (kill-ring-save whole-line-or-region-kill-ring-save nil)
-                                                   (yank whole-line-or-region-yank nil)
-                                                   )
+(defun whole-line-or-region-bind-keys ()
+  "Bind keys according to `whole-line-or-region-extensions-alist'."
+  (dolist (elem whole-line-or-region-extensions-alist)
+    (substitute-key-definition
+     (nth 0 elem)
+     (nth 1 elem)
+     whole-line-or-region-local-mode-map
+     (or (nth 2 elem) (current-global-map)))))
+
+;;;###autoload
+(defcustom whole-line-or-region-extensions-alist
+  '(
+    (copy-region-as-kill whole-line-or-region-copy-region-as-kill nil)
+    (kill-region whole-line-or-region-kill-region nil)
+    (kill-ring-save whole-line-or-region-kill-ring-save nil)
+    (yank whole-line-or-region-yank nil)
+    )
   "List of functions for whole-line-or-region to swap.
 
 When whole-line-or-region is activated, all original functions
 will be bound to their whole-line counterparts in
-`whole-line-or-region-mode-map', with the bindings taken from
+`whole-line-or-region-local-mode-map', with the bindings taken from
 global keymap, or the optionally specified keymap.
 
 The default is to map the following:
@@ -238,20 +249,6 @@ If you set this through other means than customize be sure to run
          (set symbol newval)
          (whole-line-or-region-bind-keys)))
 
-
-;;;###autoload
-(defun whole-line-or-region-bind-keys ()
-  "Bind keys according to `whole-line-or-region-extensions-alist'."
-  (dolist (elem whole-line-or-region-extensions-alist)
-    (substitute-key-definition
-     (nth 0 elem)
-     (nth 1 elem)
-     whole-line-or-region-mode-map
-     (or (nth 2 elem) (current-global-map)))))
-
-
-;; ---------------------------------------------------------------------------
-
 ;;; **************************************************************************
 ;;; ***** minor mode definitions
 ;;; **************************************************************************
@@ -268,7 +265,7 @@ undefined.
 Optional ARG turns mode on iff ARG is a positive integer."
   :group 'whole-line-or-region
   :lighter " WLR"
-  :keymap 'whole-line-or-region-mode-map)
+  :keymap 'whole-line-or-region-local-mode-map)
 
 ;;;###autoload
 (define-globalized-minor-mode whole-line-or-region-global-mode
