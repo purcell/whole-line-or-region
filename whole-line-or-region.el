@@ -433,17 +433,17 @@ is passed into FN before POST-ARGS."
       ;; just call it, but make sure to pass all of the arguments....
       (let (args)
         (when pre-args
-          (add-to-list 'args pre-args))
+          (add-to-list 'args pre-args t))
 
         (when beg-end
-          (add-to-list 'args (point))
-          (add-to-list 'args (mark)))
+          (add-to-list 'args (point) t)
+          (add-to-list 'args (mark) t))
 
         (when send-prefix
-          (add-to-list 'args (list prefix)))
+          (add-to-list 'args (list prefix) t))
 
         (when post-args
-          (add-to-list 'args post-args))
+          (add-to-list 'args post-args) t)
 
         (apply 'funcall norm-fn args))
 
@@ -466,17 +466,17 @@ is passed into FN before POST-ARGS."
 
         (let (args)
           (when pre-args
-            (add-to-list 'args pre-args))
+            (add-to-list 'args pre-args t))
 
           (when beg-end
-            (add-to-list 'args beg)
-            (add-to-list 'args end))
+            (add-to-list 'args beg t)
+            (add-to-list 'args end t))
 
           (when send-prefix
-            (add-to-list 'args (list prefix)))
+            (add-to-list 'args (list prefix) t))
 
           (when post-args
-            (add-to-list 'args post-args))
+            (add-to-list 'args post-args t))
 
           (apply 'funcall wlr-fn args))
 
