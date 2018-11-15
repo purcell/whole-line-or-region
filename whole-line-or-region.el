@@ -214,6 +214,8 @@ your convenience:
   o `whole-line-or-region-delete'
   o `whole-line-or-region-comment-dwim'
   o `whole-line-or-region-comment-dwim-2'
+  o `whole-line-or-region-comment-region'
+  o `whole-line-or-region-uncomment-region'
 
 See the individual functions for more information on what they do and
 suggested mappings.
@@ -361,46 +363,59 @@ See `comment-dwim' for details of RAW-PREFIX usage."
   (interactive "*p")
   (whole-line-or-region-call-with-prefix 'comment-dwim prefix nil t))
 
+;;;###autoload
+(defun whole-line-or-region-comment-region (prefix)
+  "Call `comment-region' on region or PREFIX whole lines"
+  (interactive "p")
+  (whole-line-or-region-call-with-region 'comment-region prefix t))
+
+;;;###autoload
+(defun whole-line-or-region-uncomment-region (prefix)
+  "Call `uncomment-region' on region or PREFIX whole lines"
+  (interactive "p")
+  (whole-line-or-region-call-with-region 'uncomment-region prefix t))
+
+
 ;;; **************************************************************************
 ;;; ***** internal functions
 ;;; **************************************************************************
 (defun whole-line-or-region-call-with-region (fn &optional cnt mark-as-whole send-prefix prefix)
   "Calls FN on region or CNT whole lines.
 
-If region is defined simply call FN, passing in the start and end of
-the current region.
+  If region is defined simply call FN, passing in the start and end of
+  the current region.
 
-If region is not currently defined, then define it temporarily as the
-current line.  Additionally, if CNT is set, expand region to cover the
-next CNT whole lines (or previous CNT whole lines, if CNT is
-negative).  Before FN is called, mark the temporary region with a
-special property if MARK-AS-WHOLE is non-nil (this is useful if the
-text could be worked on with some future whole-line-or-region
-function, and it makes sense to understand the context in which FN was
-originally called, e.g. killing and yanking text; see
-`whole-line-or-region-yank' for an example).
+  If region is not currently defined, then define it temporarily as the
+  current line.  Additionally, if CNT is set, expand region to cover the
+  next CNT whole lines (or previous CNT whole lines, if CNT is
+                           negative).  Before FN is called, mark the temporary region with a
+  special property if MARK-AS-WHOLE is non-nil (this is useful if the
+                                                     text could be worked on with some future whole-line-or-region
+                                                     function, and it makes sense to understand the context in which FN was
+                                                     originally called, e.g. killing and yanking text; see
+                                                     `whole-line-or-region-yank' for an example).
 
-In either case, if SEND-PREFIX is non-nil, then PREFIX is passed into
-FN as a third argument."
+  In either case, if SEND-PREFIX is non-nil, then PREFIX is passed into
+  FN as a third argument."
   (whole-line-or-region-base-call fn fn t nil nil cnt mark-as-whole send-prefix prefix))
 
 (defun whole-line-or-region-call-with-prefix (fn &optional cnt mark-as-whole send-prefix prefix)
   "Calls FN on region or CNT whole lines.
 
-If region is defined simply call FN.
+  If region is defined simply call FN.
 
-If region is not currently defined, then define it temporarily as the
-current line.  Additionally, if CNT is set, expand region to cover the
-next CNT whole lines (or previous CNT whole lines, if CNT is
-negative).  Before FN is called, mark the temporary region with a
-special property if MARK-AS-WHOLE is non-nil (this is useful if the
-text could be worked on with some future whole-line-or-region
-function, and it makes sense to understand the context in which FN was
-originally called, e.g. killing and yanking text; see
-`whole-line-or-region-yank' for an example).
+  If region is not currently defined, then define it temporarily as the
+  current line.  Additionally, if CNT is set, expand region to cover the
+  next CNT whole lines (or previous CNT whole lines, if CNT is
+                           negative).  Before FN is called, mark the temporary region with a
+  special property if MARK-AS-WHOLE is non-nil (this is useful if the
+                                                     text could be worked on with some future whole-line-or-region
+                                                     function, and it makes sense to understand the context in which FN was
+                                                     originally called, e.g. killing and yanking text; see
+                                                     `whole-line-or-region-yank' for an example).
 
-In either case, if SEND-PREFIX is non-nil, then PREFIX is passed into
-FN as the sole argument."
+  In either case, if SEND-PREFIX is non-nil, then PREFIX is passed into
+  FN as the sole argument."
   (whole-line-or-region-base-call fn fn nil nil nil cnt mark-as-whole send-prefix prefix))
 
 (defun whole-line-or-region-base-call (norm-fn wlr-fn
@@ -408,21 +423,21 @@ FN as the sole argument."
                                                cnt mark-as-whole send-prefix prefix)
   "Calls FN on region or CNT whole lines.
 
-If region is defined simply call NORM-FN.
+  If region is defined simply call NORM-FN.
 
-If region is not currently defined, then define it temporarily as the
-current line.  Additionally, if CNT is set, expand region to cover the
-next CNT whole lines (or previous CNT whole lines, if CNT is
-negative).  Before WLR-FN is called, mark the temporary region with a
-special property if MARK-AS-WHOLE is non-nil (this is useful if the
-text could be worked on with some future whole-line-or-region
-function, and it makes sense to understand the context in which WLR-FN was
-originally called, e.g. killing and yanking text; see
-`whole-line-or-region-yank' for an example).
+  If region is not currently defined, then define it temporarily as the
+  current line.  Additionally, if CNT is set, expand region to cover the
+  next CNT whole lines (or previous CNT whole lines, if CNT is
+                           negative).  Before WLR-FN is called, mark the temporary region with a
+  special property if MARK-AS-WHOLE is non-nil (this is useful if the
+                                                     text could be worked on with some future whole-line-or-region
+                                                     function, and it makes sense to understand the context in which WLR-FN was
+                                                     originally called, e.g. killing and yanking text; see
+                                                     `whole-line-or-region-yank' for an example).
 
-In either case, if BEG-END is non-nil, then pass into FN the start and
-end of the current region.  PRE-ARGS and POST-ARGS are lists of
-arguments to be passed into FN before \(PRE-ARGS) and/or after
+  In either case, if BEG-END is non-nil, then pass into FN the start and
+  end of the current region.  PRE-ARGS and POST-ARGS are lists of
+  arguments to be passed into FN before \(PRE-ARGS) and/or after
 \(POST-ARGS) the start and end of the current region (but only if
 BEG-END is non-nil).  Finally, if SEND-PREFIX is non-nil, then PREFIX
 is passed into FN before POST-ARGS."
