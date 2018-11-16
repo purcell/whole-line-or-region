@@ -214,6 +214,8 @@ your convenience:
   o `whole-line-or-region-delete'
   o `whole-line-or-region-comment-dwim'
   o `whole-line-or-region-comment-dwim-2'
+  o `whole-line-or-region-comment-region'
+  o `whole-line-or-region-uncomment-region'
 
 See the individual functions for more information on what they do and
 suggested mappings.
@@ -360,6 +362,19 @@ See `comment-dwim' for details of RAW-PREFIX usage."
   "Call `comment-dwim' on region or PREFIX whole lines."
   (interactive "*p")
   (whole-line-or-region-call-with-prefix 'comment-dwim prefix nil t))
+
+;;;###autoload
+(defun whole-line-or-region-comment-region (prefix)
+  "Call `comment-region' on region or PREFIX whole lines."
+  (interactive "*p")
+  (whole-line-or-region-call-with-region 'comment-region prefix t))
+
+;;;###autoload
+(defun whole-line-or-region-uncomment-region (prefix)
+  "Call `uncomment-region' on region or PREFIX whole lines."
+  (interactive "*p")
+  (whole-line-or-region-call-with-region 'uncomment-region prefix t))
+
 
 ;;; **************************************************************************
 ;;; ***** internal functions
