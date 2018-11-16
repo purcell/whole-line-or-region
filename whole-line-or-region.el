@@ -365,13 +365,13 @@ See `comment-dwim' for details of RAW-PREFIX usage."
 
 ;;;###autoload
 (defun whole-line-or-region-comment-region (prefix)
-  "Call `comment-region' on region or PREFIX whole lines"
+  "Call `comment-region' on region or PREFIX whole lines."
   (interactive "*p")
   (whole-line-or-region-call-with-region 'comment-region prefix t))
 
 ;;;###autoload
 (defun whole-line-or-region-uncomment-region (prefix)
-  "Call `uncomment-region' on region or PREFIX whole lines"
+  "Call `uncomment-region' on region or PREFIX whole lines."
   (interactive "*p")
   (whole-line-or-region-call-with-region 'uncomment-region prefix t))
 
