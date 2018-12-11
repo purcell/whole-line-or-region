@@ -1,4 +1,4 @@
-;;; whole-line-or-region.el --- operate on current line if region undefined
+;;; whole-line-or-region.el ---  on current line if region undefined
 
 ;; This file is not part of Emacs
 
@@ -8,7 +8,7 @@
 ;; Created:         July 1, 2001
 ;; Keywords:        convenience wp
 ;; Package-Version: 0
-;; Latest Version:  https://github.com/purcell/whole-line-or-region
+;; Homepage:  https://github.com/purcell/whole-line-or-region
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
