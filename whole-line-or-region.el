@@ -455,7 +455,7 @@ is passed into FN before POST-ARGS."
           (add-to-list 'args (mark) t))
 
         (when send-prefix
-          (add-to-list 'args (list prefix) t))
+          (add-to-list 'args (and prefix (list prefix)) t))
 
         (when post-args
           (add-to-list 'args post-args) t)
@@ -488,7 +488,7 @@ is passed into FN before POST-ARGS."
             (add-to-list 'args end t))
 
           (when send-prefix
-            (add-to-list 'args (list prefix) t))
+            (add-to-list 'args (and prefix (list prefix)) t))
 
           (when post-args
             (add-to-list 'args post-args t))
