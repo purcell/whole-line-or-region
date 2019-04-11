@@ -446,21 +446,11 @@ is passed into FN before POST-ARGS."
   (if (and mark-active
            (/= (point) (mark)))
       ;; just call it, but make sure to pass all of the arguments....
-      (let (args)
-        (when pre-args
-          (add-to-list 'args pre-args t))
-
-        (when beg-end
-          (add-to-list 'args (point) t)
-          (add-to-list 'args (mark) t))
-
-        (when send-prefix
-          (add-to-list 'args (and prefix (list prefix)) t))
-
-        (when post-args
-          (add-to-list 'args post-args) t)
-
-        (apply 'funcall norm-fn args))
+      (let ((args (append (when pre-args pre-args)
+                          (when beg-end (list (point) (mark)))
+                          (when send-prefix (list prefix))
+                          (when post-args post-args))))
+        (apply norm-fn args))
 
     ;; no region defined, act on whole line
     (let ((saved-column (current-column))
@@ -479,21 +469,11 @@ is passed into FN before POST-ARGS."
         (setq end (line-beginning-position (+ (or cnt 1) 1)))
         (goto-char end)
 
-        (let (args)
-          (when pre-args
-            (add-to-list 'args pre-args t))
-
-          (when beg-end
-            (add-to-list 'args beg t)
-            (add-to-list 'args end t))
-
-          (when send-prefix
-            (add-to-list 'args (and prefix (list prefix)) t))
-
-          (when post-args
-            (add-to-list 'args post-args t))
-
-          (apply 'funcall wlr-fn args))
+        (let ((args (append (when pre-args pre-args)
+                            (when beg-end (list beg end))
+                            (when send-prefix (list prefix))
+                            (when post-args post-args))))
+          (apply wlr-fn args))
 
         ;; remove whole-line property, sometimes
         (when mark-as-whole
