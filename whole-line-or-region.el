@@ -159,6 +159,8 @@
 
 ;;; Code:
 
+(require 'delsel)
+
 ;;; Keymap
 (defvar whole-line-or-region-local-mode-map (make-sparse-keymap)
   "Minor mode map for `whole-line-or-region-mode'.")
@@ -178,16 +180,6 @@
   (customize-group "whole-line-or-region"))
 
 ;; ---------------------------------------------------------------------------
-(defun whole-line-or-region-bind-keys ()
-  "Bind keys according to `whole-line-or-region-extensions-alist'."
-  (dolist (elem whole-line-or-region-extensions-alist)
-    (substitute-key-definition
-     (nth 0 elem)
-     (nth 1 elem)
-     whole-line-or-region-local-mode-map
-     (or (nth 2 elem) (current-global-map)))))
-
-;;;###autoload
 (defcustom whole-line-or-region-extensions-alist
   '(
     (copy-region-as-kill whole-line-or-region-copy-region-as-kill nil)
@@ -227,12 +219,21 @@ If you set this through other means than customize be sure to run
           (list :tag "Function Mappings:"
                 (function :tag "Original Function")
                 (function :tag "Whole-line Version")
-                (variable :tag "Keymap (optional)")
-                ))
+                (variable :tag "Keymap (optional)")))
   :group 'whole-line-or-region
   :set (lambda (symbol newval)
          (set symbol newval)
          (whole-line-or-region-bind-keys)))
+
+;;;###autoload
+(defun whole-line-or-region-bind-keys ()
+  "Bind keys according to `whole-line-or-region-extensions-alist'."
+  (dolist (elem whole-line-or-region-extensions-alist)
+    (substitute-key-definition
+     (nth 0 elem)
+     (nth 1 elem)
+     whole-line-or-region-local-mode-map
+     (or (nth 2 elem) (current-global-map)))))
 
 ;;; **************************************************************************
 ;;; ***** minor mode definitions
@@ -335,8 +336,7 @@ Optionally, pass in string to be \"yanked\" via STRING-IN."
               (delete-active-region))
             (insert string-in))
         ;; just yank as normal
-        (yank raw-prefix)))
-    ))
+        (yank raw-prefix)))))
 
 ;; in case delete-selection-mode (delsel.el) is being used
 (put 'whole-line-or-region-yank 'delete-selection t)
@@ -481,11 +481,9 @@ is passed into FN before POST-ARGS."
           (let ((inhibit-read-only t)
                 (current-mod-state (buffer-modified-p)))
             (remove-text-properties beg (min (point-max) (+ beg 1)) '(whole-line-or-region nil))
-            (set-buffer-modified-p current-mod-state)))
-        )
+            (set-buffer-modified-p current-mod-state))))
 
-      (move-to-column saved-column))
-    ))
+      (move-to-column saved-column))))
 
 
 ;; FIXME, is just running it here once the reasonable thing to do?
