@@ -180,13 +180,21 @@
   (customize-group "whole-line-or-region"))
 
 ;; ---------------------------------------------------------------------------
+(defun whole-line-or-region-bind-keys ()
+  "Bind keys according to `whole-line-or-region-extensions-alist'."
+  (dolist (elem whole-line-or-region-extensions-alist)
+    (substitute-key-definition
+     (nth 0 elem)
+     (nth 1 elem)
+     whole-line-or-region-local-mode-map
+     (or (nth 2 elem) (current-global-map)))))
+
+;;;###autoload
 (defcustom whole-line-or-region-extensions-alist
-  '(
-    (copy-region-as-kill whole-line-or-region-copy-region-as-kill nil)
+  '((copy-region-as-kill whole-line-or-region-copy-region-as-kill nil)
     (kill-region whole-line-or-region-kill-region nil)
     (kill-ring-save whole-line-or-region-kill-ring-save nil)
-    (yank whole-line-or-region-yank nil)
-    )
+    (yank whole-line-or-region-yank nil))
   "List of functions for whole-line-or-region to swap.
 
 When whole-line-or-region is activated, all original functions
@@ -224,16 +232,6 @@ If you set this through other means than customize be sure to run
   :set (lambda (symbol newval)
          (set symbol newval)
          (whole-line-or-region-bind-keys)))
-
-;;;###autoload
-(defun whole-line-or-region-bind-keys ()
-  "Bind keys according to `whole-line-or-region-extensions-alist'."
-  (dolist (elem whole-line-or-region-extensions-alist)
-    (substitute-key-definition
-     (nth 0 elem)
-     (nth 1 elem)
-     whole-line-or-region-local-mode-map
-     (or (nth 2 elem) (current-global-map)))))
 
 ;;; **************************************************************************
 ;;; ***** minor mode definitions
