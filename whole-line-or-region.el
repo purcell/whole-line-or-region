@@ -180,6 +180,8 @@
   (customize-group "whole-line-or-region"))
 
 ;; ---------------------------------------------------------------------------
+
+;;;###autoload
 (defun whole-line-or-region-bind-keys ()
   "Bind keys according to `whole-line-or-region-extensions-alist'."
   (dolist (elem whole-line-or-region-extensions-alist)
@@ -189,7 +191,6 @@
      whole-line-or-region-local-mode-map
      (or (nth 2 elem) (current-global-map)))))
 
-;;;###autoload
 (defcustom whole-line-or-region-extensions-alist
   '((copy-region-as-kill whole-line-or-region-copy-region-as-kill nil)
     (kill-region whole-line-or-region-kill-region nil)
