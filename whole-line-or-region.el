@@ -231,7 +231,7 @@ If you set this through other means than customize be sure to run
                 (variable :tag "Keymap (optional)")))
   :group 'whole-line-or-region
   :set (lambda (symbol newval)
-         (set symbol newval)
+         (set-default symbol newval)
          (whole-line-or-region-bind-keys)))
 
 ;;; **************************************************************************
