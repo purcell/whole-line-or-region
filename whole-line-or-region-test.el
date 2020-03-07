@@ -32,6 +32,7 @@
   "Execute BODY in a temp buffer into which TEXT has been inserted."
   (declare (indent 1) (debug t))
   `(with-temp-buffer
+     (setq-local comment-start "#")
      (whole-line-or-region-mode 1)
      (insert ,text)
      (goto-char (point-min))
@@ -41,7 +42,7 @@
   (wlr-simple "first\nsecond\nthird"
     (call-interactively 'set-mark-command)
     (forward-char 3)
-    (call-interactively 'whole-line-or-region-copy-region-as-kill)
+    (call-interactively 'whole-line-or-region-kill-ring-save)
     (should (equal (current-kill 0) "fir"))
     ;; Should insert selected text before previous point
     (call-interactively 'whole-line-or-region-yank)
@@ -51,7 +52,7 @@
 (ert-deftest wlr-copy-whole-line ()
   (wlr-simple "first\nsecond\nthird"
     (forward-char 3)
-    (call-interactively 'whole-line-or-region-copy-region-as-kill)
+    (call-interactively 'whole-line-or-region-kill-ring-save)
     (should (equal (current-kill 0) "first\n"))
     ;; Should insert killed line before original line
     (call-interactively 'whole-line-or-region-yank)
@@ -62,17 +63,30 @@
   (wlr-simple "first\nsecond\nthird"
     (forward-char 3)
     (let ((current-prefix-arg 2))
-      (call-interactively 'whole-line-or-region-copy-region-as-kill))
+      (call-interactively 'whole-line-or-region-kill-ring-save))
     (should (equal (current-kill 0) "first\nsecond\n"))
     ;; Should insert killed lines before original line
     (call-interactively 'whole-line-or-region-yank)
     (should (equal "first\nsecond\nfirst\nsecond\nthird" (buffer-string)))
     (should (eq (point) (+ (point-min) 3 (length "first\nsecond\n"))))))
 
+(ert-deftest wlr-copy-too-many-whole-lines ()
+  (wlr-simple "first\nsecond\nthird"
+    (forward-char 3)
+    (let ((current-prefix-arg 10))
+      (call-interactively 'whole-line-or-region-kill-ring-save))
+    (should (equal (current-kill 0) "first\nsecond\nthird"))
+    ;; Should insert killed lines before original line
+    (call-interactively 'whole-line-or-region-yank)
+    (should (equal "first\nsecond\nthird\nfirst\nsecond\nthird" (buffer-string)))
+    ;; Currently behaviour, which is arguably wrong, is to leave point
+    ;; 3 chars into the last-pasted line, ie after "thi"
+    (should (eq (point) 17))))
+
 (ert-deftest wlr-copy-whole-line-at-eof-with-no-eol ()
   (wlr-simple "first\nsecond\nthird"
     (goto-char (point-max))
-    (call-interactively 'whole-line-or-region-copy-region-as-kill)
+    (call-interactively 'whole-line-or-region-kill-ring-save)
     (should (equal (current-kill 0) "third"))
     ;; Should insert killed line before original line
     (call-interactively 'whole-line-or-region-yank)
@@ -80,6 +94,24 @@
     ;; Currently fails:
     ;;(should (eq (point) (point-max)))
     ))
+
+(ert-deftest wlr-comment-dwim-region-active ()
+  (wlr-simple "first\nsecond\nthird"
+    (call-interactively 'set-mark-command)
+    (forward-char 3)
+    (call-interactively 'whole-line-or-region-comment-dwim)
+    (should (equal "# fir\nst\nsecond\nthird" (buffer-string)))
+    ;; Leaves point at end of comment
+    (should (eq (point) 6))))
+
+(ert-deftest wlr-comment-dwim-whole-line ()
+  (wlr-simple "first\nsecond\nthird"
+    (forward-char 3)
+    (call-interactively 'whole-line-or-region-comment-dwim)
+    (should (equal "# first\nsecond\nthird" (buffer-string)))
+    ;; This is where the point is currently left, but it's arguably wrong:
+    ;; it should probably preserve the current column
+    (should (eq (point) 4))))
 
 (provide 'whole-line-or-region-test)
 ;;; whole-line-or-region-test.el ends here
