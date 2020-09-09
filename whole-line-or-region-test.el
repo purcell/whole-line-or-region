@@ -171,6 +171,18 @@
     ;; it should probably preserve the current column
     (should (eq (point) 14))))
 
+(ert-deftest wlr-rectangle-mark-still-works () :expected-result :failed
+  (wlr-simple "first\nsecond\nthird"
+    (rectangle-mark-mode 1)
+    (forward-line 2)
+    (forward-char 2)
+    (call-interactively 'whole-line-or-region-copy-region-as-kill)
+    (goto-char (point-min))
+    (call-interactively 'whole-line-or-region-yank)
+    (should (equal "fifirst\nsesecond\nththird" (buffer-string)))
+    ;; This is where the point is currently left, but it's arguably wrong:
+    ;; it should probably preserve the current column
+    (should (eq (point) 14))))
 
 
 (provide 'whole-line-or-region-test)
