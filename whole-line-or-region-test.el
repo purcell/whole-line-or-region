@@ -40,7 +40,7 @@
 
 (ert-deftest wlr-copy-whole-line-region-active ()
   (wlr-simple "first\nsecond\nthird"
-    (call-interactively 'set-mark-command)
+    (set-mark (point))
     (forward-char 3)
     (call-interactively 'whole-line-or-region-kill-ring-save)
     (should (equal (current-kill 0) "fir"))
@@ -97,7 +97,7 @@
 
 (ert-deftest wlr-comment-dwim-region-active ()
   (wlr-simple "first\nsecond\nthird"
-    (call-interactively 'set-mark-command)
+    (set-mark (point))
     (forward-char 3)
     (call-interactively 'whole-line-or-region-comment-dwim)
     (should (equal "# fir\nst\nsecond\nthird" (buffer-string)))
@@ -112,6 +112,66 @@
     ;; This is where the point is currently left, but it's arguably wrong:
     ;; it should probably preserve the current column
     (should (eq (point) 4))))
+
+(ert-deftest wlr-comment-dwim-prefix ()
+  (wlr-simple "first\nsecond\nthird"
+    (forward-char 3)
+    (let ((current-prefix-arg 2))
+      (call-interactively 'whole-line-or-region-comment-dwim))
+    (should (equal "## first\nsecond\nthird" (buffer-string)))
+    ;; This is where the point is currently left, but it's arguably wrong:
+    ;; it should probably preserve the current column
+    (should (eq (point) 4))))
+
+(ert-deftest wlr-comment-dwim-2-prefix ()
+  (wlr-simple "first\nsecond\nthird"
+    (forward-char 3)
+    (let ((current-prefix-arg 2))
+      (call-interactively 'whole-line-or-region-comment-dwim-2))
+    (should (equal "# first\n# second\nthird" (buffer-string)))
+    ;; This is where the point is currently left, but it's arguably wrong:
+    ;; it should probably preserve the current column
+    (should (eq (point) 4))))
+
+(ert-deftest wlr-comment-region ()
+  (wlr-simple "first\nsecond\nthird"
+    (forward-char 3)
+    (call-interactively 'whole-line-or-region-comment-region)
+    (should (equal "# first\nsecond\nthird" (buffer-string)))
+    ;; This is where the point is currently left, but it's arguably wrong:
+    ;; it should probably preserve the current column
+    (should (eq (point) 4))))
+
+(ert-deftest wlr-comment-region-region-active ()
+  (wlr-simple "first\nsecond\nthird"
+    (set-mark (point))
+    (forward-char 3)
+    (call-interactively 'whole-line-or-region-comment-region)
+    (should (equal "# fir\nst\nsecond\nthird" (buffer-string)))
+    ;; This is where the point is currently left, but it's arguably wrong:
+    ;; it should probably preserve the current column
+    (should (eq (point) 6))))
+
+(ert-deftest wlr-uncomment-region ()
+  (wlr-simple "# first\nsecond\nthird"
+    (forward-char 3)
+    (call-interactively 'whole-line-or-region-uncomment-region)
+    (should (equal "first\nsecond\nthird" (buffer-string)))
+    ;; This is where the point is currently left, but it's arguably wrong:
+    ;; it should probably preserve the current column
+    (should (eq (point) 4))))
+
+(ert-deftest wlr-uncomment-region-region-active ()
+  (wlr-simple "# first\n# second\nthird"
+    (set-mark (point))
+    (forward-line 2)
+    (call-interactively 'whole-line-or-region-uncomment-region)
+    (should (equal "first\nsecond\nthird" (buffer-string)))
+    ;; This is where the point is currently left, but it's arguably wrong:
+    ;; it should probably preserve the current column
+    (should (eq (point) 14))))
+
+
 
 (provide 'whole-line-or-region-test)
 ;;; whole-line-or-region-test.el ends here
