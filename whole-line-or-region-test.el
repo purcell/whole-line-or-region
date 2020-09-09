@@ -33,7 +33,7 @@
   (declare (indent 1) (debug t))
   `(with-temp-buffer
      (setq-local comment-start "#")
-     (whole-line-or-region-mode 1)
+     (whole-line-or-region-local-mode 1)
      (insert ,text)
      (goto-char (point-min))
      ,@body))
