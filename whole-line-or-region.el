@@ -257,9 +257,6 @@ Optional ARG turns mode on iff ARG is a positive integer."
   whole-line-or-region--turn-on
   :group 'whole-line-or-region)
 
-;;;###autoload
-(define-obsolete-function-alias 'whole-line-or-region-mode 'whole-line-or-region-global-mode)
-
 (defun whole-line-or-region--turn-on ()
   (whole-line-or-region-local-mode +1))
 
