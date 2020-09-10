@@ -210,7 +210,7 @@ preceding point."
 ;;;###autoload
 (defun whole-line-or-region-copy-region-as-kill (prefix)
   "Call `copy-region-as-kill' on region or PREFIX whole lines."
-  (interactive "*p")
+  (interactive "p")
   (whole-line-or-region-wrap-region-kill 'copy-region-as-kill prefix))
 
 ;;;###autoload
@@ -222,7 +222,7 @@ preceding point."
 ;;;###autoload
 (defun whole-line-or-region-kill-ring-save (prefix)
   "Call `kill-ring-save' on region or PREFIX whole lines."
-  (interactive "*p")
+  (interactive "p")
   (whole-line-or-region-wrap-region-kill 'kill-ring-save prefix))
 
 ;;;###autoload

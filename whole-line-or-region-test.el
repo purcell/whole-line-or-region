@@ -86,6 +86,17 @@ fir|st
 second
 third"))
 
+(ert-deftest wlr-copy-whole-line-when-readonly ()
+  (wlr-before-after
+   "fir|st
+second
+third"
+   (read-only-mode 1)
+   (call-interactively 'whole-line-or-region-kill-ring-save)
+   (should (equal (current-kill 0) "first\n"))   (forward-line 1)
+   (call-interactively 'whole-line-or-region-copy-region-as-kill)
+   (should (equal (current-kill 0) "second\n"))))
+
 (ert-deftest wlr-yank-excludes-properties ()
   (wlr-before-after
    "st|
