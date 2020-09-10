@@ -130,6 +130,24 @@ first|
 second
 third"))
 
+(ert-deftest wlr-yank-undo ()
+  (wlr-before-after
+   "first|
+second
+third"
+   (call-interactively 'whole-line-or-region-kill-ring-save)
+   (yank)
+   "first
+first|
+second
+third"
+   (let ((last-command 'yank)
+         (kill-ring '("blah")))
+     (yank-pop))
+   "firstblah|
+second
+third"))
+
 (ert-deftest wlr-kill-region ()
   (wlr-before-after
    "fir|st
