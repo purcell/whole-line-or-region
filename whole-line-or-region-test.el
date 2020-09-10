@@ -164,22 +164,6 @@ third"
 first
 third|"))
 
-(ert-deftest wlr-kill-region ()
-  (wlr-before-after
-   "fir|st
-second
-third"
-   (call-interactively 'whole-line-or-region-kill-region)
-   (should (equal (current-kill 0) "first\n"))
-   "|second
-third"
-   (goto-char (point-max))
-   ;; Should insert killed line before original line
-   (yank)
-   "second
-first
-third|"))
-
 (ert-deftest wlr-copy-works-without-transient-mark-mode ()
   (let (transient-mark-mode)
     (wlr-before-after
