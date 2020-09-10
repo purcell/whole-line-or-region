@@ -48,15 +48,16 @@ the expected buffer contents (like BEFORE), and will be replaced
 with a corresponding assertion on the buffer's current state."
   (pcase-let ((`(,initial-text . ,initial-offset) (wlr-picture-to-text-and-offset before)))
     `(with-temp-buffer
-       (insert ,initial-text)
-       (goto-char ,initial-offset)
-       (setq-local comment-start "#")
-       (whole-line-or-region-local-mode 1)
-       ,@(mapcar (lambda (step)
-                   (if (stringp step)
-                       `(should (equal ,step (wlr-make-picture)))
-                     step))
-                 steps))))
+       (let (kill-ring)
+         (insert ,initial-text)
+         (goto-char ,initial-offset)
+         (setq-local comment-start "#")
+         (whole-line-or-region-local-mode 1)
+         ,@(mapcar (lambda (step)
+                     (if (stringp step)
+                         `(should (equal ,step (wlr-make-picture)))
+                       step))
+                   steps)))))
 
 (ert-deftest wlr-copy-whole-line-region-active ()
   (wlr-before-after
