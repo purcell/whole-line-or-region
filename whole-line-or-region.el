@@ -139,6 +139,12 @@ to not remove the excluded properties itself."
 
 ;;; Helpers for wrapping commands
 
+(defun whole-line-or-region-use-region-p ()
+  "Return non-nil if we expect underlying commands to use the region."
+  (and mark-active
+       (or use-empty-active-region
+           (> (region-end) (region-beginning)))))
+
 (defmacro whole-line-or-region-filter-with-yank-handler (&rest body)
   "Execute BODY with `filter-buffer-substring-function' bound.
 The binding ensure killed strings have a yank handler attached."
@@ -160,7 +166,7 @@ If NUM-LINES is non-zero and the region is inactive, it denotes
 the number of lines to operate upon, where positive numbers
 indicate lines after point, and negative numbers represent lines
 preceding point."
-  (if (use-region-p)
+  (if (whole-line-or-region-use-region-p)
       (funcall f (region-beginning) (region-end) 'region)
     (whole-line-or-region-filter-with-yank-handler
      (funcall f
@@ -178,7 +184,7 @@ If NUM-LINES is non-zero and the region is inactive, it denotes
 the number of lines to operate upon, where positive numbers
 indicate lines after point, and negative numbers represent lines
 preceding point."
-  (if (use-region-p)
+  (if (whole-line-or-region-use-region-p)
       (apply f (region-beginning) (region-end) rest)
     (apply f
            (line-beginning-position 1)
@@ -197,7 +203,7 @@ If NUM-LINES is non-zero and the region is inactive, it denotes
 the number of lines to operate upon, where positive numbers
 indicate lines after point, and negative numbers represent lines
 preceding point."
-  (if (use-region-p)
+  (if (whole-line-or-region-use-region-p)
       (apply f rest)
     (save-excursion
       (set-mark (line-beginning-position 1))

@@ -111,7 +111,6 @@ third"
 second
 third"))
 
-
 (ert-deftest wlr-yank-excludes-properties ()
   (wlr-before-after
    "st|
@@ -147,20 +146,32 @@ third"
 first
 third|"))
 
-(ert-deftest wlr-yank-with-mode-disabled ()
+(ert-deftest wlr-kill-region ()
   (wlr-before-after
    "fir|st
 second
 third"
-   (call-interactively 'whole-line-or-region-kill-ring-save)
+   (call-interactively 'whole-line-or-region-kill-region)
    (should (equal (current-kill 0) "first\n"))
-   (whole-line-or-region-local-mode -1)
-   ;; Should insert killed line at point, not on previous line
+   "|second
+third"
+   (goto-char (point-max))
+   ;; Should insert killed line before original line
    (yank)
-   "firfirst
-|st
+   "second
+first
+third|"))
+
+(ert-deftest wlr-copy-works-without-transient-mark-mode ()
+  (let (transient-mark-mode)
+    (wlr-before-after
+     "fir|st
 second
-third"))
+third"
+     (set-mark (point-min))
+     (should (not (region-active-p)))
+     (call-interactively 'whole-line-or-region-kill-ring-save)
+     (should (equal (current-kill 0) "fir")))))
 
 (ert-deftest wlr-copy-several-whole-lines ()
   (wlr-before-after
