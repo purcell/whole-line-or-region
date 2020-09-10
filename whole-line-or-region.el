@@ -161,7 +161,7 @@ The binding ensure killed strings have a yank handler attached."
              (lambda (&rest args)
                (let ((s (apply ,orig args)))
                  (propertize s 'yank-handler
-                             (list 'whole-line-or-region-yank-handler s t))))))
+                             (list 'whole-line-or-region-yank-handler nil t))))))
        ,@body)))
 
 (defun whole-line-or-region-wrap-region-kill (f num-lines)
