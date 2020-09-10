@@ -86,6 +86,25 @@ fir|st
 second
 third"))
 
+(ert-deftest wlr-yank-excludes-properties ()
+  (wlr-before-after
+   "st|
+second
+third"
+   (let ((yank-excluded-properties (cons 'wlr-test-excluded yank-excluded-properties)))
+     (save-excursion
+       (goto-char (point-min))
+       (insert (propertize "fir" 'wlr-test-excluded t)))
+     (call-interactively 'whole-line-or-region-kill-ring-save)
+     (should (equal (current-kill 0) "first\n"))
+     ;; Should insert killed line before original line
+     (yank)
+     (should (not (get-text-property (- (point) 1) 'wlr-test-excluded))))
+   "first
+first|
+second
+third"))
+
 (ert-deftest wlr-kill-region ()
   (wlr-before-after
    "fir|st

@@ -123,10 +123,18 @@ STRING is the string being yanked."
            whole-line-or-region-local-mode)
       (save-excursion
         (move-beginning-of-line 1)
-        (insert string)
+        (whole-line-or-region-insert-clean string)
         (unless (eq (char-before) ?\n)
           (insert "\n")))
-    (insert string)))
+    (whole-line-or-region-insert-clean string)))
+
+(defun whole-line-or-region-insert-clean (string)
+  "Insert STRING and remove `yank-excluded-properties'.
+This is needed because the yank handler may move point, and is
+therefore registered with the NOEXCLUDE flag: this causes `yank'
+to not remove the excluded properties itself."
+  (insert string)
+  (remove-yank-excluded-properties (point) (- (point) (length string))))
 
 
 ;;; Helpers for wrapping commands
