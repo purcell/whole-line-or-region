@@ -97,6 +97,21 @@ third"
    (call-interactively 'whole-line-or-region-copy-region-as-kill)
    (should (equal (current-kill 0) "second\n"))))
 
+(ert-deftest wlr-honours-kill-read-only-ok ()
+  (wlr-before-after
+   "fir|st
+second
+third"
+   (read-only-mode 1)
+   (should-error (call-interactively 'whole-line-or-region-kill-region))
+   (let ((kill-read-only-ok t))
+     (call-interactively 'whole-line-or-region-kill-region)
+     (should (equal (current-kill 0) "first\n")))
+   "fir|st
+second
+third"))
+
+
 (ert-deftest wlr-yank-excludes-properties ()
   (wlr-before-after
    "st|

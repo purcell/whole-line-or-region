@@ -216,7 +216,7 @@ preceding point."
 ;;;###autoload
 (defun whole-line-or-region-kill-region (prefix)
   "Call `kill-region' on region or PREFIX whole lines."
-  (interactive "*p")
+  (interactive "p")
   (whole-line-or-region-wrap-region-kill 'kill-region prefix))
 
 ;;;###autoload
