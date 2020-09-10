@@ -136,7 +136,7 @@ When ENSURE-NEWLINE is non-nil, add a newline if there was none."
   (let ((beg (point))
         end)
     (insert string)
-    (remove-yank-excluded-properties (point) (- (point) (length string)))
+    (remove-yank-excluded-properties beg (point))
     (when (and ensure-newline (not (eq (char-before) ?\n)))
       (insert "\n"))
     (setq end (point))
