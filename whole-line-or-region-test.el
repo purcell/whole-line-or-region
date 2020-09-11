@@ -94,7 +94,8 @@ third"))
    (call-interactively 'whole-line-or-region-kill-region)
    "|"
    (yank)
-   "first|"))
+   "first
+|"))
 
 (ert-deftest wlr-yank-with-newline-in-empty-buffer ()
   (wlr-before-after
@@ -115,7 +116,8 @@ third"))
 |"
    (yank)
    "
-first|"))
+first
+|"))
 
 (ert-deftest wlr-kill-region-preserves-column ()
   (wlr-before-after

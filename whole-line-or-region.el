@@ -109,6 +109,17 @@ commands are affected."
 
 
 
+;;; Internal helpers
+(defmacro whole-line-or-region-preserve-column (&rest body)
+  "Ensure the current column is kept the same after executing BODY."
+  (let ((init (cl-gensym)))
+    `(let ((,init (current-column)))
+       (prog1
+           (progn ,@body)
+         (move-to-column ,init)))))
+
+
+
 ;;; Yank handler
 
 (defun whole-line-or-region-yank-handler (string)
@@ -116,11 +127,10 @@ commands are affected."
 STRING is the string being yanked."
   (if (and (not (and delete-selection-mode mark-active))
            whole-line-or-region-local-mode)
-      (let ((initial-pos (point-marker)))
-        (forward-line 0)
-        (prog1
-            (whole-line-or-region-insert-clean string t)
-          (goto-char initial-pos)))
+      (whole-line-or-region-preserve-column
+       (forward-line 0)
+       (push-mark nil t)
+       (whole-line-or-region-insert-clean string t))
     (whole-line-or-region-insert-clean string nil)))
 
 (defun whole-line-or-region-insert-clean (string &optional ensure-newline)
@@ -130,14 +140,13 @@ therefore registered with the NOEXCLUDE flag: this causes `yank'
 to not remove the excluded properties itself.
 
 When ENSURE-NEWLINE is non-nil, add a newline if there was none."
-  (let ((beg (point))
+  (let ((beg (point-marker))
         end)
-    (insert-before-markers string)
-    (push-mark beg)
+    (insert string)
     (remove-yank-excluded-properties beg (point))
-    (when (and ensure-newline (not (eq (char-before) ?\n)) (not (eobp)))
-      (insert-before-markers "\n"))
-    (setq end (point))
+    (when (and ensure-newline (not (eq (char-before) ?\n)))
+      (insert "\n"))
+    (setq end (point-marker))
     (setq yank-undo-function
           (lambda (_beg _end) (delete-region beg end)))))
 
@@ -161,14 +170,6 @@ The binding ensure killed strings have a yank handler attached."
                  (propertize s 'yank-handler
                              (list 'whole-line-or-region-yank-handler nil t))))))
        ,@body)))
-
-(defmacro whole-line-or-region-preserve-column (&rest body)
-  "Ensure the current column is kept the same after executing BODY."
-  (let ((init (cl-gensym)))
-    `(let ((,init (current-column)))
-       (prog1
-           (progn ,@body)
-         (move-to-column ,init)))))
 
 (defun whole-line-or-region-wrap-region-kill (f num-lines)
   "Wrap a region function F, such as `kill-region'.
