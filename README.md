@@ -36,6 +36,11 @@ usual.
 Other commands are similarly overridden, e.g. `comment-dwim`: see
 `whole-line-or-region-local-mode-map` for more details.
 
+Using positive numeric prefix arguments, you can operate on multiple
+lines at once, e.g. `C-3 C-w` will kill 3 whole lines, beginning with
+the current line. Cycling yanks with `yank-pop` (`M-w`) should also
+work correctly.
+
 Functions are provided which allow you to easily wrap other commands
 so that they will also operate on the current line by default. The
 wrapped commands can then similarly be remapped in
