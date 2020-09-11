@@ -128,8 +128,9 @@ STRING is the string being yanked."
   (if (and (not (and delete-selection-mode mark-active))
            whole-line-or-region-local-mode)
       (whole-line-or-region-preserve-column
-       (forward-line 0)
-       (push-mark nil t)
+       (unless (bolp)
+         (forward-line 0)
+         (push-mark nil t))
        (whole-line-or-region-insert-clean string t))
     (whole-line-or-region-insert-clean string nil)))
 
