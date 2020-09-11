@@ -232,7 +232,8 @@ third"
    (yank)
    "first
 second
-thi|rd"))
+thi|rd"
+   (should (equal (point-min) (mark)))))
 
 (ert-deftest wlr-consecutive-kill-region-combines-them-bol ()
   (wlr-before-after
