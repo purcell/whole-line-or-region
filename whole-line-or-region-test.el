@@ -88,6 +88,35 @@ fir|st
 second
 third"))
 
+(ert-deftest wlr-yank-in-empty-buffer ()
+  (wlr-before-after
+   "fir|st"
+   (call-interactively 'whole-line-or-region-kill-region)
+   "|"
+   (yank)
+   "first|"))
+
+(ert-deftest wlr-yank-with-newline-in-empty-buffer ()
+  (wlr-before-after
+   "fir|st\n"
+   (call-interactively 'whole-line-or-region-kill-region)
+   "|"
+   (yank)
+   "first
+|"))
+
+(ert-deftest wlr-yank-in-empty-buffer-with-newline ()
+  (wlr-before-after
+   "fir|st"
+   (call-interactively 'whole-line-or-region-kill-region)
+   "|"
+   (newline)
+   "
+|"
+   (yank)
+   "
+first|"))
+
 (ert-deftest wlr-kill-region-preserves-column ()
   (wlr-before-after
    "fir|st

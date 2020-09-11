@@ -135,7 +135,7 @@ When ENSURE-NEWLINE is non-nil, add a newline if there was none."
     (insert-before-markers string)
     (push-mark beg)
     (remove-yank-excluded-properties beg (point))
-    (when (and ensure-newline (not (eq (char-before) ?\n)))
+    (when (and ensure-newline (not (eq (char-before) ?\n)) (not (eobp)))
       (insert-before-markers "\n"))
     (setq end (point))
     (setq yank-undo-function
