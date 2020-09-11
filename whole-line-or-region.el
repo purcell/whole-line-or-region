@@ -2,8 +2,9 @@
 
 ;; This file is not part of Emacs
 
-;; Copyright (C) 2001 by Joseph L. Casadonte Jr.
 ;; Copyright (C) 2011-2020 Steve Purcell
+;; Copyright (C) 2001 by Joseph L. Casadonte Jr.
+
 ;; Author:          Joe Casadonte <emacs@northbound-train.com>
 ;; Author:          Steve Purcell <steve@sanityinc.com>
 ;; Maintainer:      Steve Purcell <steve@sanityinc.com>
@@ -27,7 +28,7 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;;
+
 ;; This minor mode allows functions to operate on the current line if
 ;; they would normally operate on a region and region is currently
 ;; undefined.
@@ -41,24 +42,18 @@
 ;; you don't need to position yourself at the start of the line before
 ;; yanking.  If region *is* defined, though, all functions act as
 ;; normal.
-;;
-;; NOTE: This package will behave unexpectedly (and indeed is nearly
-;; useless) if `transient-mark-mode' is off, as there is then always a
-;; region defined.
-;;
+
 ;;; Usage:
-;;
+
 ;; M-x `whole-line-or-region-local-mode'
 
 ;; Use `whole-line-or-region-local-mode' to toggle the overridden
 ;; behaviour on & off on a per-buffer basis.  This remaps common
 ;; commands such as `copy-region-as-kill', `kill-ring-save' etc.
 ;;
-;; To enable the mode for all buffers enable
+;; To enable the mode for all buffers, enable
 ;; `whole-line-or-region-global-mode'.
 
-;;; Extending Package:
-;;
 ;; In order to extend this package for additional region-based
 ;; functions, you must understand how those functions work, and write
 ;; a new stub function that will be used to replace it.  Several
@@ -132,7 +127,7 @@ STRING is the string being yanked."
   "Insert STRING and remove `yank-excluded-properties'.
 This is needed because the yank handler may move point, and is
 therefore registered with the NOEXCLUDE flag: this causes `yank'
-to not remove the excluded properties itself
+to not remove the excluded properties itself.
 
 When ENSURE-NEWLINE is non-nil, add a newline if there was none."
   (let ((beg (point))
