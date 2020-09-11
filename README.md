@@ -24,6 +24,23 @@ years. In 2020 the internals were rewritten to use modern Emacs
 features such as `filter-buffer-substring-function` and
 `yank-handler`, and thereby behave more consistently.
 
+# Usage
+
+Enabling `whole-line-or-region-global-mode` causes the common
+kill/copy commands to be remapped. When no region is active, if you
+type `C-w` then the current line will be copied. When yanked using
+`C-y`, it will be yanked _before_ the current line. If a region is
+active, e.g. if you have selected a word, the commands will behave as
+usual.
+
+Other commands are similarly overridden, e.g. `comment-dwim`: see
+`whole-line-or-region-local-mode-map` for more details.
+
+Functions are provided which allow you to easily wrap other commands
+so that they will also operate on the current line by default. The
+wrapped commands can then similarly be remapped in
+`whole-line-or-region-local-mode-map`.
+
 ## Installation
 
 ### Manual
