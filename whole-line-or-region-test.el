@@ -82,6 +82,7 @@ third"
    (should (equal (current-kill 0) "first\n"))
    ;; Should insert killed line before original line
    (yank)
+   (should (eq (point-min) (mark)))
    "first
 fir|st
 second
@@ -101,6 +102,7 @@ second"
    (call-interactively 'whole-line-or-region-kill-ring-save)
    (should (equal (current-kill 0) "first\n"))
    (yank)
+   (should (eq (point-min) (mark)))
    "first
 |first
 second"))

@@ -121,9 +121,11 @@ commands are affected."
 STRING is the string being yanked."
   (if (and (not (and delete-selection-mode mark-active))
            whole-line-or-region-local-mode)
-      (save-excursion
+      (let ((initial-pos (point-marker)))
         (forward-line 0)
-        (whole-line-or-region-insert-clean string t))
+        (prog1
+            (whole-line-or-region-insert-clean string t)
+          (goto-char initial-pos)))
     (whole-line-or-region-insert-clean string nil)))
 
 (defun whole-line-or-region-insert-clean (string &optional ensure-newline)
@@ -136,6 +138,7 @@ When ENSURE-NEWLINE is non-nil, add a newline if there was none."
   (let ((beg (point))
         end)
     (insert-before-markers string)
+    (push-mark beg)
     (remove-yank-excluded-properties beg (point))
     (when (and ensure-newline (not (eq (char-before) ?\n)))
       (insert-before-markers "\n"))
