@@ -122,7 +122,7 @@ STRING is the string being yanked."
   (if (and (not (and delete-selection-mode mark-active))
            whole-line-or-region-local-mode)
       (save-excursion
-        (move-beginning-of-line 1)
+        (forward-line 0)
         (whole-line-or-region-insert-clean string t))
     (whole-line-or-region-insert-clean string nil)))
 
