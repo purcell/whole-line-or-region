@@ -28,161 +28,388 @@
 (require 'whole-line-or-region)
 
 
-(defmacro wlr-simple (text &rest body)
-  "Execute BODY in a temp buffer into which TEXT has been inserted."
-  (declare (indent 1) (debug t))
-  `(with-temp-buffer
-     (setq-local comment-start "#")
-     (whole-line-or-region-local-mode 1)
-     (insert ,text)
-     (goto-char (point-min))
-     ,@body))
+(eval-and-compile
+  (defun wlr-picture-to-text-and-offset (picture)
+    "Parse a picture of the buffer with | representing point."
+    (let ((parts (split-string picture "|")))
+      (unless (eq 2 (length parts))
+        (error "Picture of buffer contents should contain exactly one \"|\" placeholder to mark point"))
+      (cons (apply 'concat parts)
+            (+ 1 (length (car parts))))))
+  (defun wlr-make-picture ()
+    (concat (buffer-substring (point-min) (point)) "|"
+            (buffer-substring (point) (point-max)))))
+
+
+(defmacro wlr-before-after (before &rest steps)
+  "Make a buffer look like BEFORE, then perform STEPS.
+When a STEP is a string literal, it is assumed to be a picture of
+the expected buffer contents (like BEFORE), and will be replaced
+with a corresponding assertion on the buffer's current state."
+  (pcase-let ((`(,initial-text . ,initial-offset) (wlr-picture-to-text-and-offset before)))
+    `(with-temp-buffer
+       (let (kill-ring)
+         (insert ,initial-text)
+         (goto-char ,initial-offset)
+         (setq-local comment-start "#")
+         (whole-line-or-region-local-mode 1)
+         ,@(mapcar (lambda (step)
+                     (if (stringp step)
+                         `(should (equal ,step (wlr-make-picture)))
+                       step))
+                   steps)))))
 
 (ert-deftest wlr-copy-whole-line-region-active ()
-  (wlr-simple "first\nsecond\nthird"
-    (set-mark (point))
-    (forward-char 3)
-    (call-interactively 'whole-line-or-region-kill-ring-save)
-    (should (equal (current-kill 0) "fir"))
-    ;; Should insert selected text before previous point
-    (call-interactively 'whole-line-or-region-yank)
-    (should (equal "firfirst\nsecond\nthird" (buffer-string)))
-    (should (looking-back "firfir"))))
+  (wlr-before-after
+   "fir|st
+second
+third"
+   (set-mark (point-min))
+   (call-interactively 'whole-line-or-region-kill-ring-save)
+   (should (equal (current-kill 0) "fir"))
+   ;; Should insert selected text before previous point
+   (yank)
+   "firfir|st
+second
+third"))
 
 (ert-deftest wlr-copy-whole-line ()
-  (wlr-simple "first\nsecond\nthird"
-    (forward-char 3)
-    (call-interactively 'whole-line-or-region-kill-ring-save)
-    (should (equal (current-kill 0) "first\n"))
-    ;; Should insert killed line before original line
-    (call-interactively 'whole-line-or-region-yank)
-    (should (equal "first\nfirst\nsecond\nthird" (buffer-string)))
-    (should (eq (point) (+ (point-min) 3 (length "first\n"))))))
+  (wlr-before-after
+   "fir|st
+second
+third"
+   (call-interactively 'whole-line-or-region-kill-ring-save)
+   (should (equal (current-kill 0) "first\n"))
+   ;; Should insert killed line before original line
+   (yank)
+   (should (eq (point-min) (mark)))
+   "first
+fir|st
+second
+third"))
+
+(ert-deftest wlr-yank-in-empty-buffer ()
+  (wlr-before-after
+   "fir|st"
+   (call-interactively 'whole-line-or-region-kill-region)
+   "|"
+   (yank)
+   "first
+|"))
+
+(ert-deftest wlr-yank-with-newline-in-empty-buffer ()
+  (wlr-before-after
+   "fir|st\n"
+   (call-interactively 'whole-line-or-region-kill-region)
+   "|"
+   (yank)
+   "first
+|"))
+
+(ert-deftest wlr-yank-in-empty-buffer-with-newline ()
+  (wlr-before-after
+   "fir|st"
+   (call-interactively 'whole-line-or-region-kill-region)
+   "|"
+   (newline)
+   "
+|"
+   (yank)
+   "
+first
+|"))
+
+(ert-deftest wlr-kill-region-preserves-column ()
+  (wlr-before-after
+   "fir|st
+second"
+   (call-interactively 'whole-line-or-region-kill-region)
+   "sec|ond"))
+
+(ert-deftest wlr-copy-whole-line-bol ()
+  (wlr-before-after
+   "|first
+second"
+   (call-interactively 'whole-line-or-region-kill-ring-save)
+   (should (equal (current-kill 0) "first\n"))
+   (yank)
+   (should (eq (point-min) (mark)))
+   "first
+|first
+second"))
+
+(ert-deftest wlr-copy-whole-line-when-readonly ()
+  (wlr-before-after
+   "fir|st
+second
+third"
+   (read-only-mode 1)
+   (call-interactively 'whole-line-or-region-kill-ring-save)
+   (should (equal (current-kill 0) "first\n"))   (forward-line 1)
+   (call-interactively 'whole-line-or-region-copy-region-as-kill)
+   (should (equal (current-kill 0) "second\n"))))
+
+(ert-deftest wlr-honours-kill-read-only-ok ()
+  (wlr-before-after
+   "fir|st
+second
+third"
+   (read-only-mode 1)
+   (should-error (call-interactively 'whole-line-or-region-kill-region))
+   (let ((kill-read-only-ok t))
+     (call-interactively 'whole-line-or-region-kill-region)
+     (should (equal (current-kill 0) "first\n")))
+   "fir|st
+second
+third"))
+
+(ert-deftest wlr-yank-excludes-properties ()
+  (wlr-before-after
+   "st|
+second
+third"
+   (let ((yank-excluded-properties (cons 'wlr-test-excluded yank-excluded-properties)))
+     (save-excursion
+       (goto-char (point-min))
+       (insert (propertize "fir" 'wlr-test-excluded t)))
+     (call-interactively 'whole-line-or-region-kill-ring-save)
+     (should (equal (current-kill 0) "first\n"))
+     ;; Should insert killed line before original line
+     (yank)
+     (should (not (get-text-property (- (point) 1) 'wlr-test-excluded))))
+   "first
+first|
+second
+third"))
+
+(ert-deftest wlr-yank-undo ()
+  (wlr-before-after
+   "first|
+second
+third"
+   (call-interactively 'whole-line-or-region-kill-ring-save)
+   (yank)
+   "first
+first|
+second
+third"
+   (let ((last-command 'yank)
+         (kill-ring '("blah")))
+     (yank-pop))
+   "firstblah|
+second
+third"))
+
+(ert-deftest wlr-kill-region ()
+  (wlr-before-after
+   "fir|st
+second
+third"
+   (call-interactively 'whole-line-or-region-kill-region)
+   (should (equal (current-kill 0) "first\n"))
+   "sec|ond
+third"
+   (goto-char (point-max))
+   ;; Should insert killed line before original line
+   (yank)
+   "second
+first
+third|"))
+
+(ert-deftest wlr-consecutive-kill-region-combines-them ()
+  (wlr-before-after
+   "fir|st
+second
+third"
+   (call-interactively 'whole-line-or-region-kill-region)
+   (should (equal (current-kill 0) "first\n"))
+   "sec|ond
+third"
+   (let ((last-command 'kill-region))
+     (call-interactively 'whole-line-or-region-kill-region))
+   (should (equal (current-kill 0) "first\nsecond\n"))
+   "thi|rd"
+   (yank)
+   "first
+second
+thi|rd"
+   (should (equal (point-min) (mark)))))
+
+(ert-deftest wlr-consecutive-kill-region-combines-them-bol ()
+  (wlr-before-after
+   "|first
+second
+third"
+   (call-interactively 'whole-line-or-region-kill-region)
+   (should (equal (current-kill 0) "first\n"))
+   "|second
+third"
+   (let ((last-command 'kill-region))
+     (call-interactively 'whole-line-or-region-kill-region))
+   (should (equal (current-kill 0) "first\nsecond\n"))
+   "|third"
+   (yank)
+   "first
+second
+|third"))
+
+(ert-deftest wlr-copy-works-without-transient-mark-mode ()
+  (let (transient-mark-mode)
+    (wlr-before-after
+     "fir|st
+second
+third"
+     (set-mark (point-min))
+     (should (not (region-active-p)))
+     (call-interactively 'whole-line-or-region-kill-ring-save)
+     (should (equal (current-kill 0) "fir")))))
 
 (ert-deftest wlr-copy-several-whole-lines ()
-  (wlr-simple "first\nsecond\nthird"
-    (forward-char 3)
-    (let ((current-prefix-arg 2))
-      (call-interactively 'whole-line-or-region-kill-ring-save))
-    (should (equal (current-kill 0) "first\nsecond\n"))
-    ;; Should insert killed lines before original line
-    (call-interactively 'whole-line-or-region-yank)
-    (should (equal "first\nsecond\nfirst\nsecond\nthird" (buffer-string)))
-    (should (eq (point) (+ (point-min) 3 (length "first\nsecond\n"))))))
+  (wlr-before-after
+   "fir|st
+second
+third"
+   (let ((current-prefix-arg 2))
+     (call-interactively 'whole-line-or-region-kill-ring-save))
+   (should (equal (current-kill 0) "first\nsecond\n"))
+   ;; Should insert killed lines before original line
+   (yank)
+   "first
+second
+fir|st
+second
+third"))
 
 (ert-deftest wlr-copy-too-many-whole-lines ()
-  (wlr-simple "first\nsecond\nthird"
-    (forward-char 3)
-    (let ((current-prefix-arg 10))
-      (call-interactively 'whole-line-or-region-kill-ring-save))
-    (should (equal (current-kill 0) "first\nsecond\nthird"))
-    ;; Should insert killed lines before original line
-    (call-interactively 'whole-line-or-region-yank)
-    (should (equal "first\nsecond\nthird\nfirst\nsecond\nthird" (buffer-string)))
-    ;; Currently behaviour, which is arguably wrong, is to leave point
-    ;; 3 chars into the last-pasted line, ie after "thi"
-    (should (eq (point) 17))))
+  (wlr-before-after
+   "fir|st
+second
+third"
+   (let ((current-prefix-arg 10))
+     (call-interactively 'whole-line-or-region-kill-ring-save))
+   (should (equal (current-kill 0) "first\nsecond\nthird"))
+   ;; Should insert killed lines before original line
+   (yank)
+   "first
+second
+third
+fir|st
+second
+third"))
 
 (ert-deftest wlr-copy-whole-line-at-eof-with-no-eol ()
-  (wlr-simple "first\nsecond\nthird"
-    (goto-char (point-max))
-    (call-interactively 'whole-line-or-region-kill-ring-save)
-    (should (equal (current-kill 0) "third"))
-    ;; Should insert killed line before original line
-    (call-interactively 'whole-line-or-region-yank)
-    (should (equal "first\nsecond\nthird\nthird" (buffer-string)))
-    ;; Currently fails:
-    ;;(should (eq (point) (point-max)))
-    ))
+  (wlr-before-after
+   "first
+second
+third|"
+   (call-interactively 'whole-line-or-region-kill-ring-save)
+   (should (equal (current-kill 0) "third"))
+   ;; Should insert killed line before original line
+   (yank)
+   "first
+second
+third
+third|"))
 
 (ert-deftest wlr-comment-dwim-region-active ()
-  (wlr-simple "first\nsecond\nthird"
-    (set-mark (point))
-    (forward-char 3)
-    (call-interactively 'whole-line-or-region-comment-dwim)
-    (should (equal "# fir\nst\nsecond\nthird" (buffer-string)))
-    ;; Leaves point at end of comment
-    (should (eq (point) 6))))
+  (wlr-before-after
+   "fir|st
+second
+third"
+   (set-mark (point-min))
+   (call-interactively 'whole-line-or-region-comment-dwim)
+   "# fir|
+st
+second
+third"))
 
 (ert-deftest wlr-comment-dwim-whole-line ()
-  (wlr-simple "first\nsecond\nthird"
-    (forward-char 3)
-    (call-interactively 'whole-line-or-region-comment-dwim)
-    (should (equal "# first\nsecond\nthird" (buffer-string)))
-    ;; This is where the point is currently left, but it's arguably wrong:
-    ;; it should probably preserve the current column
-    (should (eq (point) 4))))
+  (wlr-before-after
+   "fir|st
+second
+third"
+   (call-interactively 'whole-line-or-region-comment-dwim)
+   "# fir|st
+second
+third"))
 
 (ert-deftest wlr-comment-dwim-prefix ()
-  (wlr-simple "first\nsecond\nthird"
-    (forward-char 3)
-    (let ((current-prefix-arg 2))
-      (call-interactively 'whole-line-or-region-comment-dwim))
-    (should (equal "## first\nsecond\nthird" (buffer-string)))
-    ;; This is where the point is currently left, but it's arguably wrong:
-    ;; it should probably preserve the current column
-    (should (eq (point) 4))))
+  (wlr-before-after
+   "fir|st
+second
+third"
+   (let ((current-prefix-arg 2))
+     (call-interactively 'whole-line-or-region-comment-dwim))
+   "## fir|st
+second
+third"))
 
 (ert-deftest wlr-comment-dwim-2-prefix ()
-  (wlr-simple "first\nsecond\nthird"
-    (forward-char 3)
-    (let ((current-prefix-arg 2))
-      (call-interactively 'whole-line-or-region-comment-dwim-2))
-    (should (equal "# first\n# second\nthird" (buffer-string)))
-    ;; This is where the point is currently left, but it's arguably wrong:
-    ;; it should probably preserve the current column
-    (should (eq (point) 4))))
+  (wlr-before-after
+   "fir|st
+second
+third"
+   (let ((current-prefix-arg 2))
+     (call-interactively 'whole-line-or-region-comment-dwim-2))
+   "# fir|st
+# second
+third"))
 
 (ert-deftest wlr-comment-region ()
-  (wlr-simple "first\nsecond\nthird"
-    (forward-char 3)
-    (call-interactively 'whole-line-or-region-comment-region)
-    (should (equal "# first\nsecond\nthird" (buffer-string)))
-    ;; This is where the point is currently left, but it's arguably wrong:
-    ;; it should probably preserve the current column
-    (should (eq (point) 4))))
+  (wlr-before-after
+   "fir|st
+second
+third"
+   (call-interactively 'whole-line-or-region-comment-region)
+   "# fir|st
+second
+third"))
 
 (ert-deftest wlr-comment-region-region-active ()
-  (wlr-simple "first\nsecond\nthird"
-    (set-mark (point))
-    (forward-char 3)
-    (call-interactively 'whole-line-or-region-comment-region)
-    (should (equal "# fir\nst\nsecond\nthird" (buffer-string)))
-    ;; This is where the point is currently left, but it's arguably wrong:
-    ;; it should probably preserve the current column
-    (should (eq (point) 6))))
+  (wlr-before-after
+   "fir|st
+second
+third"
+   (set-mark (point-min))
+   (call-interactively 'whole-line-or-region-comment-region)
+   "# fir|
+st
+second
+third"))
 
 (ert-deftest wlr-uncomment-region ()
-  (wlr-simple "# first\nsecond\nthird"
-    (forward-char 3)
-    (call-interactively 'whole-line-or-region-uncomment-region)
-    (should (equal "first\nsecond\nthird" (buffer-string)))
-    ;; This is where the point is currently left, but it's arguably wrong:
-    ;; it should probably preserve the current column
-    (should (eq (point) 4))))
+  (wlr-before-after
+   "# f|irst
+second
+third"
+   (call-interactively 'whole-line-or-region-uncomment-region)
+   "f|irst
+second
+third"))
 
 (ert-deftest wlr-uncomment-region-region-active ()
-  (wlr-simple "# first\n# second\nthird"
-    (set-mark (point))
-    (forward-line 2)
-    (call-interactively 'whole-line-or-region-uncomment-region)
-    (should (equal "first\nsecond\nthird" (buffer-string)))
-    ;; This is where the point is currently left, but it's arguably wrong:
-    ;; it should probably preserve the current column
-    (should (eq (point) 14))))
+  (wlr-before-after
+   "# first
+# second
+|third"
+   (set-mark (point-min))
+   (call-interactively 'whole-line-or-region-uncomment-region)
+   "first\nsecond\n|third"))
 
-(ert-deftest wlr-rectangle-mark-still-works () :expected-result :failed
-  (wlr-simple "first\nsecond\nthird"
-    (rectangle-mark-mode 1)
-    (forward-line 2)
-    (forward-char 2)
-    (call-interactively 'whole-line-or-region-copy-region-as-kill)
-    (goto-char (point-min))
-    (call-interactively 'whole-line-or-region-yank)
-    (should (equal "fifirst\nsesecond\nththird" (buffer-string)))
-    ;; This is where the point is currently left, but it's arguably wrong:
-    ;; it should probably preserve the current column
-    (should (eq (point) 14))))
+(ert-deftest wlr-rectangle-mark-still-works ()
+  (wlr-before-after
+   "|first
+second
+third"
+   (rectangle-mark-mode 1)
+   (forward-line 2)
+   (forward-char 2)
+   (call-interactively 'whole-line-or-region-copy-region-as-kill)
+   (goto-char (point-min))
+   (yank)
+   "fifirst
+sesecond
+th|third"))
 
 
 (provide 'whole-line-or-region-test)
