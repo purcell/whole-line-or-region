@@ -87,6 +87,17 @@ fir|st
 second
 third"))
 
+(ert-deftest wlr-copy-whole-line-bol ()
+  (wlr-before-after
+   "|first
+second"
+   (call-interactively 'whole-line-or-region-kill-ring-save)
+   (should (equal (current-kill 0) "first\n"))
+   (yank)
+   "first
+|first
+second"))
+
 (ert-deftest wlr-copy-whole-line-when-readonly ()
   (wlr-before-after
    "fir|st
@@ -164,6 +175,43 @@ third"
    "second
 first
 third|"))
+
+(ert-deftest wlr-consecutive-kill-region-combines-them ()
+  (wlr-before-after
+   "fir|st
+second
+third"
+   (call-interactively 'whole-line-or-region-kill-region)
+   (should (equal (current-kill 0) "first\n"))
+   "|second
+third"
+   (let ((last-command 'kill-region))
+     (call-interactively 'whole-line-or-region-kill-region))
+   (should (equal (current-kill 0) "first\nsecond\n"))
+   (forward-char 3)
+   "thi|rd"
+   (yank)
+   "first
+second
+thi|rd"))
+
+(ert-deftest wlr-consecutive-kill-region-combines-them-bol ()
+  (wlr-before-after
+   "fir|st
+second
+third"
+   (call-interactively 'whole-line-or-region-kill-region)
+   (should (equal (current-kill 0) "first\n"))
+   "|second
+third"
+   (let ((last-command 'kill-region))
+     (call-interactively 'whole-line-or-region-kill-region))
+   (should (equal (current-kill 0) "first\nsecond\n"))
+   "|third"
+   (yank)
+   "first
+second
+|third"))
 
 (ert-deftest wlr-copy-works-without-transient-mark-mode ()
   (let (transient-mark-mode)

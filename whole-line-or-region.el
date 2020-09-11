@@ -135,10 +135,10 @@ to not remove the excluded properties itself
 When ENSURE-NEWLINE is non-nil, add a newline if there was none."
   (let ((beg (point))
         end)
-    (insert string)
+    (insert-before-markers string)
     (remove-yank-excluded-properties beg (point))
     (when (and ensure-newline (not (eq (char-before) ?\n)))
-      (insert "\n"))
+      (insert-before-markers "\n"))
     (setq end (point))
     (setq yank-undo-function
           (lambda (_beg _end) (delete-region beg end)))))
