@@ -164,6 +164,14 @@ The binding ensure killed strings have a yank handler attached."
                              (list 'whole-line-or-region-yank-handler nil t))))))
        ,@body)))
 
+(defmacro whole-line-or-region-preserve-column (&rest body)
+  "Ensure the current column is kept the same after executing BODY."
+  (let ((init (cl-gensym)))
+    `(let ((,init (current-column)))
+       (prog1
+           (progn ,@body)
+         (move-to-column ,init)))))
+
 (defun whole-line-or-region-wrap-region-kill (f num-lines)
   "Wrap a region function F, such as `kill-region'.
 
@@ -176,10 +184,11 @@ preceding point."
   (if (whole-line-or-region-use-region-p)
       (funcall f (region-beginning) (region-end) 'region)
     (whole-line-or-region-filter-with-yank-handler
-     (funcall f
-              (line-beginning-position 1)
-              (line-beginning-position (+ 1 num-lines))
-              nil))))
+     (whole-line-or-region-preserve-column
+      (funcall f
+               (line-beginning-position 1)
+               (line-beginning-position (+ 1 num-lines))
+               nil)))))
 
 (defun whole-line-or-region-wrap-beg-end (f num-lines &rest rest)
   "Wrap function F and call it passing the possibly-expanded region.

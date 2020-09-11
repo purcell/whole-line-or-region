@@ -87,6 +87,13 @@ fir|st
 second
 third"))
 
+(ert-deftest wlr-kill-region-preserves-column ()
+  (wlr-before-after
+   "fir|st
+second"
+   (call-interactively 'whole-line-or-region-kill-region)
+   "sec|ond"))
+
 (ert-deftest wlr-copy-whole-line-bol ()
   (wlr-before-after
    "|first
@@ -167,7 +174,7 @@ second
 third"
    (call-interactively 'whole-line-or-region-kill-region)
    (should (equal (current-kill 0) "first\n"))
-   "|second
+   "sec|ond
 third"
    (goto-char (point-max))
    ;; Should insert killed line before original line
@@ -183,12 +190,11 @@ second
 third"
    (call-interactively 'whole-line-or-region-kill-region)
    (should (equal (current-kill 0) "first\n"))
-   "|second
+   "sec|ond
 third"
    (let ((last-command 'kill-region))
      (call-interactively 'whole-line-or-region-kill-region))
    (should (equal (current-kill 0) "first\nsecond\n"))
-   (forward-char 3)
    "thi|rd"
    (yank)
    "first
@@ -197,7 +203,7 @@ thi|rd"))
 
 (ert-deftest wlr-consecutive-kill-region-combines-them-bol ()
   (wlr-before-after
-   "fir|st
+   "|first
 second
 third"
    (call-interactively 'whole-line-or-region-kill-region)
