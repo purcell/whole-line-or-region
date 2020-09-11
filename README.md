@@ -24,7 +24,7 @@ years. In 2020 the internals were rewritten to use modern Emacs
 features such as `filter-buffer-substring-function` and
 `yank-handler`, and thereby behave more consistently.
 
-# Usage
+## Usage
 
 Enabling `whole-line-or-region-global-mode` causes the common
 kill/copy commands to be remapped. When no region is active, if you
