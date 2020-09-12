@@ -27,6 +27,11 @@
 (require 'ert)
 (require 'whole-line-or-region)
 
+;; Reset all the tests for this package, particularly to remove
+;; deleted or renamed tests
+(cl-loop for s being the symbols
+         do (when (string-prefix-p "wlr-" (symbol-name s))
+              (ert-delete-test s)))
 
 (eval-and-compile
   (defun wlr-picture-to-text-and-offset (picture)
