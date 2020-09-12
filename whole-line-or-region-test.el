@@ -96,7 +96,6 @@ third"
    (set-mark (point-min))
    (call-interactively 'whole-line-or-region-kill-ring-save)
    (should (equal (current-kill 0) "fir"))
-   ;; Should insert selected text before previous point
    (yank)
    "firfir|st
 second
@@ -109,7 +108,6 @@ second
 third"
    (call-interactively 'whole-line-or-region-kill-ring-save)
    (should (equal (current-kill 0) "first\n"))
-   ;; Should insert killed line before original line
    (yank)
    (should (eq (point-min) (mark)))
    "first
@@ -203,7 +201,6 @@ third"
        (insert (propertize "fir" 'wlr-test-excluded t)))
      (call-interactively 'whole-line-or-region-kill-ring-save)
      (should (equal (current-kill 0) "first\n"))
-     ;; Should insert killed line before original line
      (yank)
      (should (not (get-text-property (- (point) 1) 'wlr-test-excluded))))
    "first
@@ -239,7 +236,6 @@ third"
    "sec|ond
 third"
    (goto-char (point-max))
-   ;; Should insert killed line before original line
    (yank)
    "second
 first
@@ -301,7 +297,6 @@ third"
    (let ((current-prefix-arg 2))
      (call-interactively 'whole-line-or-region-kill-ring-save))
    (should (equal (current-kill 0) "first\nsecond\n"))
-   ;; Should insert killed lines before original line
    (yank)
    "first
 second
@@ -317,7 +312,6 @@ third"
    (let ((current-prefix-arg 10))
      (call-interactively 'whole-line-or-region-kill-ring-save))
    (should (equal (current-kill 0) "first\nsecond\nthird"))
-   ;; Should insert killed lines before original line
    (yank)
    "first
 second
@@ -333,7 +327,6 @@ second
 third|"
    (call-interactively 'whole-line-or-region-kill-ring-save)
    (should (equal (current-kill 0) "third"))
-   ;; Should insert killed line before original line
    (yank)
    "first
 second
