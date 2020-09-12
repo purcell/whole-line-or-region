@@ -33,6 +33,9 @@
          do (when (string-prefix-p "wlr-" (symbol-name s))
               (ert-delete-test s)))
 
+
+;;; Express tests in terms of simple "pictures" of the buffer contents
+
 (eval-and-compile
   (defun wlr-picture-to-text-and-offset (picture)
     "Parse a picture of the buffer with | representing point."
@@ -43,26 +46,44 @@
             (+ 1 (length (car parts))))))
   (defun wlr-make-picture ()
     (concat (buffer-substring (point-min) (point)) "|"
-            (buffer-substring (point) (point-max)))))
+            (buffer-substring (point) (point-max))))
+  (defun wlr-apply-picture (picture)
+    (pcase-let ((`(,text . ,offset) (wlr-picture-to-text-and-offset picture)))
+      (delete-region (point-min) (point-max))
+      (insert text)
+      (goto-char offset))))
 
+(ert-deftest wlr-pictures ()
+  (with-temp-buffer
+    (wlr-apply-picture "foo|bar\n")
+    (should (equal "foobar\n" (buffer-string)))
+    (should (eq 4 (point)))
+    (forward-char 2)
+    (should (equal "fooba|r\n" (wlr-make-picture)))))
 
-(defmacro wlr-before-after (before &rest steps)
+(defmacro wlr-with-pictures (before &rest steps)
   "Make a buffer look like BEFORE, then perform STEPS.
 When a STEP is a string literal, it is assumed to be a picture of
 the expected buffer contents (like BEFORE), and will be replaced
 with a corresponding assertion on the buffer's current state."
-  (pcase-let ((`(,initial-text . ,initial-offset) (wlr-picture-to-text-and-offset before)))
-    `(with-temp-buffer
-       (let (kill-ring)
-         (insert ,initial-text)
-         (goto-char ,initial-offset)
-         (setq-local comment-start "#")
-         (whole-line-or-region-local-mode 1)
-         ,@(mapcar (lambda (step)
-                     (if (stringp step)
-                         `(should (equal ,step (wlr-make-picture)))
-                       step))
-                   steps)))))
+  `(progn
+     (wlr-apply-picture ,before)
+     ,@(mapcar (lambda (step)
+                 (if (stringp step)
+                     `(should (equal ,step (wlr-make-picture)))
+                   step))
+               steps)))
+
+
+;;;
+
+(defmacro wlr-before-after (before &rest steps)
+  "Run `wlr-ert-with-pictures' for BEFORE and STEPS in a temp buffer."
+  `(with-temp-buffer
+     (let (kill-ring)
+       (setq-local comment-start "#")
+       (whole-line-or-region-local-mode 1)
+       (wlr-with-pictures ,before ,@steps))))
 
 (ert-deftest wlr-copy-whole-line-region-active ()
   (wlr-before-after
