@@ -75,7 +75,7 @@ with a corresponding assertion on the buffer's current state."
                steps)))
 
 
-;;;
+;;; Run `wlr-with-pictures' in a temp buffer with the minor mode enabled
 
 (defmacro wlr-before-after (before &rest steps)
   "Run `wlr-ert-with-pictures' for BEFORE and STEPS in a temp buffer."
@@ -84,6 +84,9 @@ with a corresponding assertion on the buffer's current state."
        (setq-local comment-start "#")
        (whole-line-or-region-local-mode 1)
        (wlr-with-pictures ,before ,@steps))))
+
+
+;;; The actual tests
 
 (ert-deftest wlr-copy-whole-line-region-active ()
   (wlr-before-after
