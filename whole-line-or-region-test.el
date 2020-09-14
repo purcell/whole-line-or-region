@@ -435,8 +435,9 @@ th|third"))
 
 
 (provide 'whole-line-or-region-test)
-;;; whole-line-or-region-test.el ends here
 
 ;; Local Variables:
 ;; no-byte-compile: t
 ;; End:
+
+;;; whole-line-or-region-test.el ends here
