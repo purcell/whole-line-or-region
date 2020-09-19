@@ -433,6 +433,41 @@ third"
 sesecond
 th|third"))
 
+(ert-deftest wlr-indent-rigidly-right-with-region ()
+  (wlr-before-after
+   "first
+sec|ond
+third"
+   (set-mark (point-min))
+   (call-interactively 'whole-line-or-region-indent-rigidly-right)
+   " first
+ sec|ond
+third"))
+
+(ert-deftest wlr-indent-rigidly-right ()
+  (wlr-before-after
+   "fir|st
+second
+third"
+   (call-interactively 'whole-line-or-region-indent-rigidly-right)
+   " fir|st
+second
+third"))
+
+(ert-deftest wlr-indent-rigidly-right-left-to-tabstop ()
+  (let ((tab-stop-list '(0 3 6)))
+    (wlr-before-after
+     "fir|st
+second
+third"
+     (call-interactively 'whole-line-or-region-indent-rigidly-right-to-tab-stop)
+     (call-interactively 'whole-line-or-region-indent-rigidly-right-to-tab-stop)
+     (call-interactively 'whole-line-or-region-indent-rigidly-left-to-tab-stop)
+     "   fir|st
+second
+third")))
+
+
 
 (provide 'whole-line-or-region-test)
 
