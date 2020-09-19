@@ -91,6 +91,10 @@
     (define-key map [remap comment-dwim] 'whole-line-or-region-comment-dwim-2)
     (define-key map [remap comment-region] 'whole-line-or-region-comment-region)
     (define-key map [remap uncomment-region] 'whole-line-or-region-uncomment-region)
+    (define-key map [remap indent-rigidly-left-to-tab-stop] 'whole-line-or-region-indent-rigidly-left-to-tab-stop)
+    (define-key map [remap indent-rigidly-right-to-tab-stop] 'whole-line-or-region-indent-rigidly-right-to-tab-stop)
+    (define-key map [remap indent-rigidly-left] 'whole-line-or-region-indent-rigidly-left)
+    (define-key map [remap indent-rigidly-right] 'whole-line-or-region-indent-rigidly-right)
     map)
   "Minor mode map for `whole-line-or-region-mode'.")
 
@@ -286,6 +290,29 @@ PREFIX is passed unchanged to `comment-dwim'."
   (interactive "P")
   (whole-line-or-region-wrap-beg-end 'comment-or-uncomment-region prefix t))
 
+;;;###autoload
+(defun whole-line-or-region-indent-rigidly-left-to-tab-stop (prefix)
+  "Call `indent-rigidly-left-to-tab-stop' on region or PREFIX whole lines."
+  (interactive "*p")
+  (whole-line-or-region-wrap-beg-end 'indent-rigidly-left-to-tab-stop prefix))
+
+;;;###autoload
+(defun whole-line-or-region-indent-rigidly-right-to-tab-stop (prefix)
+  "Call `indent-rigidly-right-to-tab-stop' on region or PREFIX whole lines."
+  (interactive "*p")
+  (whole-line-or-region-wrap-beg-end 'indent-rigidly-right-to-tab-stop prefix))
+
+;;;###autoload
+(defun whole-line-or-region-indent-rigidly-left (prefix)
+  "Call `indent-rigidly-left-to-tab-stop' on region or PREFIX whole lines."
+  (interactive "*p")
+  (whole-line-or-region-wrap-beg-end 'indent-rigidly-left prefix))
+
+;;;###autoload
+(defun whole-line-or-region-indent-rigidly-right (prefix)
+  "Call `indent-rigidly-right-to-tab-stop' on region or PREFIX whole lines."
+  (interactive "*p")
+  (whole-line-or-region-wrap-beg-end 'indent-rigidly-right prefix))
 
 (provide 'whole-line-or-region)
 
