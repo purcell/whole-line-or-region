@@ -106,10 +106,15 @@ commands are affected."
   :lighter " WLR"
   :keymap 'whole-line-or-region-local-mode-map)
 
+(defcustom whole-line-or-region-inhibit-modes '(pdf-view-mode)
+  "Inhibit the effect of `whole-line-or-region-global-mode' in these major modes.")
+
 ;;;###autoload
 (define-globalized-minor-mode whole-line-or-region-global-mode
   whole-line-or-region-local-mode
-  (lambda () (whole-line-or-region-local-mode 1)))
+  (lambda ()
+    (unless (apply 'derived-mode-p whole-line-or-region-inhibit-modes)
+      (whole-line-or-region-local-mode 1))))
 
 
 
