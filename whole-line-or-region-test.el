@@ -366,6 +366,40 @@ third"
 second
 third"))
 
+(ert-deftest wlr-yank-region-delete-selection ()
+  (wlr-before-after
+   "fir|st"
+   (setq-local delete-selection-mode t)
+   (set-mark (point-min))
+   (goto-char (point-max))
+   (call-interactively 'whole-line-or-region-kill-region)
+   "|"
+   (insert "hello")
+   (set-mark (point-min))
+   (goto-char (point-max))
+   (let ((this-command 'yank))
+     (delete-selection-pre-hook)
+     (call-interactively 'yank))
+   "first|"
+   ))
+
+(ert-deftest wlr-yank-delete-selection ()
+  (wlr-before-after
+   "fir|st
+second"
+   (setq-local delete-selection-mode t)
+   (call-interactively 'whole-line-or-region-kill-region)
+   "sec|ond"
+   (set-mark (point-min))
+   (goto-char (point-max))
+   (should (region-active-p))
+   (let ((this-command 'yank))
+     (delete-selection-pre-hook)
+     (call-interactively 'yank))
+   "first
+|"
+   ))
+
 (ert-deftest wlr-comment-dwim-2-prefix ()
   (wlr-before-after
    "fir|st
