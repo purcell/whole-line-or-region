@@ -107,7 +107,8 @@ commands are affected."
   :keymap 'whole-line-or-region-local-mode-map)
 
 (defcustom whole-line-or-region-inhibit-modes '(pdf-view-mode)
-  "Inhibit the effect of `whole-line-or-region-global-mode' in these major modes.")
+  "Inhibit the effect of `whole-line-or-region-global-mode' in these major modes."
+  :type '(list symbol))
 
 ;;;###autoload
 (define-globalized-minor-mode whole-line-or-region-global-mode
