@@ -110,6 +110,10 @@ commands are affected."
   "Inhibit the effect of `whole-line-or-region-global-mode' in these major modes."
   :type '(list symbol))
 
+(defcustom whole-line-or-region-yank-before-current-line t
+  "If t, always yank before current line; otherwise always at point."
+  :type 'boolean)
+
 ;;;###autoload
 (define-globalized-minor-mode whole-line-or-region-global-mode
   whole-line-or-region-local-mode
@@ -195,12 +199,17 @@ indicate lines after point, and negative numbers represent lines
 preceding point."
   (if (whole-line-or-region-use-region-p)
       (funcall f (region-beginning) (region-end) 'region)
-    (whole-line-or-region-filter-with-yank-handler
-     (whole-line-or-region-preserve-column
+    (if whole-line-or-region-yank-before-current-line
+        (whole-line-or-region-filter-with-yank-handler
+         (whole-line-or-region-preserve-column
+          (funcall f
+                   (line-beginning-position 1)
+                   (line-beginning-position (+ 1 num-lines))
+                   nil)))
       (funcall f
                (line-beginning-position 1)
-               (line-beginning-position (+ 1 num-lines))
-               nil)))))
+               (line-end-position num-lines)
+               nil))))
 
 (defun whole-line-or-region-wrap-beg-end (f num-lines &rest rest)
   "Wrap function F and call it passing the possibly-expanded region.
