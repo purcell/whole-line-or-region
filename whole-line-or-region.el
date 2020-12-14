@@ -91,10 +91,6 @@
     (define-key map [remap comment-dwim] 'whole-line-or-region-comment-dwim-2)
     (define-key map [remap comment-region] 'whole-line-or-region-comment-region)
     (define-key map [remap uncomment-region] 'whole-line-or-region-uncomment-region)
-    (define-key map [remap indent-rigidly-left-to-tab-stop] 'whole-line-or-region-indent-rigidly-left-to-tab-stop)
-    (define-key map [remap indent-rigidly-right-to-tab-stop] 'whole-line-or-region-indent-rigidly-right-to-tab-stop)
-    (define-key map [remap indent-rigidly-left] 'whole-line-or-region-indent-rigidly-left)
-    (define-key map [remap indent-rigidly-right] 'whole-line-or-region-indent-rigidly-right)
     map)
   "Minor mode map for `whole-line-or-region-mode'.")
 
