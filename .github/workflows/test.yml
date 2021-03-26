@@ -22,9 +22,10 @@ jobs:
           - 26.2
           - 26.3
           - 27.1
+          - 27.2
           - snapshot
     steps:
-    - uses: purcell/setup-emacs@v3.0
+    - uses: purcell/setup-emacs@master
       with:
         version: ${{ matrix.emacs_version }}
 
