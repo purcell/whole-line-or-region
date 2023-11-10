@@ -1,6 +1,6 @@
 [![Melpa Status](http://melpa.org/packages/whole-line-or-region-badge.svg)](http://melpa.org/#/whole-line-or-region)
 [![Melpa Stable Status](http://stable.melpa.org/packages/whole-line-or-region-badge.svg)](http://stable.melpa.org/#/whole-line-or-region)
-[![Build Status](https://github.com/purcell/whole-line-or-region/workflows/CI/badge.svg)](https://github.com/purcell/whole-line-or-region/actions)
+[![Build Status](https://github.com/purcell/whole-line-or-region/actions/workflows/test.yml/badge.svg)](https://github.com/purcell/whole-line-or-region/actions/workflows/test.yml)
 <a href="https://www.patreon.com/sanityinc"><img alt="Support me" src="https://img.shields.io/badge/Support%20Me-%F0%9F%92%97-ff69b4.svg"></a>
 
 # In Emacs, operate on the current line if no region is active
