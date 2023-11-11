@@ -374,7 +374,7 @@ third"))
 (ert-deftest wlr-yank-region-delete-selection ()
   (wlr-before-after
    "fir|st"
-   (setq-local delete-selection-mode t)
+   (delete-selection-mode)
    (set-mark (point-min))
    (goto-char (point-max))
    (call-interactively 'whole-line-or-region-kill-region)
@@ -392,7 +392,7 @@ third"))
   (wlr-before-after
    "fir|st
 second"
-   (setq-local delete-selection-mode t)
+   (delete-selection-mode)
    (call-interactively 'whole-line-or-region-kill-region)
    "sec|ond"
    (set-mark (point-min))
