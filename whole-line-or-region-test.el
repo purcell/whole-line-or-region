@@ -26,6 +26,7 @@
 
 (require 'ert)
 (require 'whole-line-or-region)
+(require 'delsel)
 
 ;; Reset all the tests for this package, particularly to remove
 ;; deleted or renamed tests
