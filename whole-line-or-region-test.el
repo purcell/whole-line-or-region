@@ -27,6 +27,7 @@
 (require 'ert)
 (require 'whole-line-or-region)
 (require 'delsel)
+(require 'rx)
 
 ;; Reset all the tests for this package, particularly to remove
 ;; deleted or renamed tests
@@ -83,6 +84,9 @@ with a corresponding assertion on the buffer's current state."
   `(with-temp-buffer
      (let (kill-ring)
        (setq-local comment-start "#")
+       (setq-local comment-start-skip (rx "#" (* space)))
+       (setq-local comment-use-syntax nil)
+       (setq-local indent-tabs-mode nil)
        (whole-line-or-region-local-mode 1)
        (wlr-with-pictures ,before ,@steps))))
 
