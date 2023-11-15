@@ -38,7 +38,7 @@ Other commands are similarly overridden, e.g. `comment-dwim`: see
 
 Using positive numeric prefix arguments, you can operate on multiple
 lines at once, e.g. `C-3 C-w` will kill 3 whole lines, beginning with
-the current line. Cycling yanks with `yank-pop` (`M-w`) should also
+the current line. Cycling yanks with `yank-pop` (`M-y`) should also
 work correctly.
 
 Functions are provided which allow you to easily wrap other commands
