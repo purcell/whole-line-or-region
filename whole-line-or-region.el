@@ -81,6 +81,10 @@
   :group 'editing-basics
   :group 'convenience)
 
+(defcustom whole-line-or-region-visual-p nil
+  "Whether or not visual lines are targeted."
+  :type 'boolean)
+
 ;;; Keymap
 (defvar whole-line-or-region-local-mode-map
   (let ((map (make-sparse-keymap)))
@@ -189,14 +193,17 @@ If NUM-LINES is non-zero and the region is inactive, it denotes
 the number of lines to operate upon, where positive numbers
 indicate lines after point, and negative numbers represent lines
 preceding point."
-  (if (whole-line-or-region-use-region-p)
-      (funcall f (region-beginning) (region-end) 'region)
-    (whole-line-or-region-filter-with-yank-handler
-     (whole-line-or-region-preserve-column
-      (funcall f
-               (line-beginning-position 1)
-               (line-beginning-position (+ 1 num-lines))
-               nil)))))
+  (cl-flet ((line-start (if whole-line-or-region-visual-p
+                          #'beginning-of-visual-line
+                          #'line-beginning-position)))
+    (if (whole-line-or-region-use-region-p)
+        (funcall f (region-beginning) (region-end) 'region)
+      (whole-line-or-region-filter-with-yank-handler
+       (whole-line-or-region-preserve-column
+        (funcall f
+                 (line-start 1)
+                 (line-start (+ 1 num-lines))
+                 nil))))))
 
 (defun whole-line-or-region-wrap-beg-end (f num-lines &rest rest)
   "Wrap function F and call it passing the possibly-expanded region.
@@ -208,12 +215,15 @@ If NUM-LINES is non-zero and the region is inactive, it denotes
 the number of lines to operate upon, where positive numbers
 indicate lines after point, and negative numbers represent lines
 preceding point."
+  (cl-flet ((line-start (if whole-line-or-region-visual-p
+                          #'beginning-of-visual-line
+                          #'line-beginning-position)))
   (if (whole-line-or-region-use-region-p)
       (apply f (region-beginning) (region-end) rest)
     (apply f
-           (line-beginning-position 1)
-           (line-beginning-position (+ 1 num-lines))
-           rest)))
+           (line-start 1)
+           (line-start (+ 1 num-lines))
+           rest))))
 
 (defun whole-line-or-region-wrap-modified-region (f num-lines &rest rest)
   "Wrap function F and call it passing the possibly-expanded region.
@@ -227,12 +237,15 @@ If NUM-LINES is non-zero and the region is inactive, it denotes
 the number of lines to operate upon, where positive numbers
 indicate lines after point, and negative numbers represent lines
 preceding point."
+  (cl-flet ((line-start (if whole-line-or-region-visual-p
+                          #'beginning-of-visual-line
+                          #'line-beginning-position)))
   (if (whole-line-or-region-use-region-p)
       (apply f rest)
     (save-excursion
-      (set-mark (line-beginning-position 1))
-      (goto-char (line-beginning-position (+ 1 num-lines)))
-      (apply f rest))))
+      (set-mark (line-start 1))
+      (goto-char (line-start (+ 1 num-lines)))
+      (apply f rest)))))
 
 
 ;;; Wrappers for commonly-used functions
