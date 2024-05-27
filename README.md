@@ -28,7 +28,7 @@ features such as `filter-buffer-substring-function` and
 
 Enabling `whole-line-or-region-global-mode` causes the common
 kill/copy commands to be remapped. When no region is active, if you
-type `C-w` then the current line will be copied. When yanked using
+type `C-w` then the current line will be killed. When yanked using
 `C-y`, it will be yanked _before_ the current line. If a region is
 active, e.g. if you have selected a word, the commands will behave as
 usual.
