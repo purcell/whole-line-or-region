@@ -230,9 +230,12 @@ preceding point."
   (if (whole-line-or-region-use-region-p)
       (apply f rest)
     (save-excursion
-      (set-mark (line-beginning-position 1))
-      (goto-char (line-beginning-position (+ 1 num-lines)))
-      (apply f rest))))
+      (let
+          ;; The subsequent function call might require Transient Mark Mode awareness
+          ((transient-mark-mode 'lambda))
+        (set-mark (line-beginning-position 1))
+        (goto-char (line-beginning-position (+ 1 num-lines)))
+        (apply f rest)))))
 
 
 ;;; Wrappers for commonly-used functions

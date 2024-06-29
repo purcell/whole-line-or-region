@@ -343,6 +343,7 @@ third|"))
    "fir|st
 second
 third"
+   (transient-mark-mode 1)
    (set-mark (point-min))
    (call-interactively 'whole-line-or-region-comment-dwim)
    "# fir|
@@ -374,6 +375,7 @@ third"))
 (ert-deftest wlr-yank-region-delete-selection ()
   (wlr-before-after
    "fir|st"
+   (transient-mark-mode 1)
    (delete-selection-mode)
    (set-mark (point-min))
    (goto-char (point-max))
@@ -392,6 +394,7 @@ third"))
   (wlr-before-after
    "fir|st
 second"
+   (transient-mark-mode 1)
    (delete-selection-mode)
    (call-interactively 'whole-line-or-region-kill-region)
    "sec|ond"
