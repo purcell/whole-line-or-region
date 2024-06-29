@@ -509,6 +509,29 @@ third"
 second
 third")))
 
+(ert-deftest wlr-regression-issue-26 ()
+  (wlr-before-after
+   "CREATE TABLE account (
+  name VARCHAR(10) NOT NULL
+);|"
+   (buffer-enable-undo)
+   (transient-mark-mode 1)
+   (goto-line 2)
+   (call-interactively 'whole-line-or-region-kill-region)
+   "CREATE TABLE account (
+|);"
+   (primitive-undo 1 buffer-undo-list)
+   "CREATE TABLE account (
+|  name VARCHAR(10) NOT NULL
+);"
+   (search-forward "10")
+   (set-mark (- (point) 2))
+   (should (region-active-p))
+   (call-interactively 'whole-line-or-region-kill-ring-save)
+   (call-interactively 'yank)
+   "CREATE TABLE account (
+  name VARCHAR(1010|) NOT NULL
+);"))
 
 
 (provide 'whole-line-or-region-test)

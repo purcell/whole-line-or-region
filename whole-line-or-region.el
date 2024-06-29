@@ -173,11 +173,9 @@ The binding ensure killed strings have a yank handler attached."
     `(let* ((,orig filter-buffer-substring-function)
             (filter-buffer-substring-function
              (lambda (&rest args)
-               (let ((s (apply ,orig args)))
-                 (put-text-property 0 (length s) 'yank-handler
-                                    '(whole-line-or-region-yank-handler nil t)
-                                    s)
-                 s))))
+               (propertize (apply ,orig args)
+                           'yank-handler
+                           '(whole-line-or-region-yank-handler nil t)))))
        ,@body)))
 
 (defun whole-line-or-region-wrap-region-kill (f num-lines)
