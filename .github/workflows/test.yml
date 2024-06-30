@@ -7,6 +7,16 @@ on:
     - '**.md'
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: purcell/setup-emacs@master
+      with:
+        version: 29.1
+    - uses: actions/checkout@v4
+    - name: Run tests
+      run: make package-lint
+
   build:
     runs-on: ubuntu-latest
     strategy:
@@ -31,6 +41,6 @@ jobs:
       with:
         version: ${{ matrix.emacs_version }}
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Run tests
-      run: make
+      run: make compile test
