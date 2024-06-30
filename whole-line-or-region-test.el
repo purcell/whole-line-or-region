@@ -343,6 +343,7 @@ third|"))
    "fir|st
 second
 third"
+   (transient-mark-mode 1)
    (set-mark (point-min))
    (call-interactively 'whole-line-or-region-comment-dwim)
    "# fir|
@@ -374,6 +375,7 @@ third"))
 (ert-deftest wlr-yank-region-delete-selection ()
   (wlr-before-after
    "fir|st"
+   (transient-mark-mode 1)
    (delete-selection-mode)
    (set-mark (point-min))
    (goto-char (point-max))
@@ -392,6 +394,7 @@ third"))
   (wlr-before-after
    "fir|st
 second"
+   (transient-mark-mode 1)
    (delete-selection-mode)
    (call-interactively 'whole-line-or-region-kill-region)
    "sec|ond"
@@ -506,6 +509,29 @@ third"
 second
 third")))
 
+(ert-deftest wlr-regression-issue-26 ()
+  (wlr-before-after
+   "CREATE TABLE account (
+  name VARCHAR(10) NOT NULL
+);|"
+   (buffer-enable-undo)
+   (transient-mark-mode 1)
+   (goto-line 2)
+   (call-interactively 'whole-line-or-region-kill-region)
+   "CREATE TABLE account (
+|);"
+   (primitive-undo 1 buffer-undo-list)
+   "CREATE TABLE account (
+|  name VARCHAR(10) NOT NULL
+);"
+   (search-forward "10")
+   (set-mark (- (point) 2))
+   (should (region-active-p))
+   (call-interactively 'whole-line-or-region-kill-ring-save)
+   (call-interactively 'yank)
+   "CREATE TABLE account (
+  name VARCHAR(1010|) NOT NULL
+);"))
 
 
 (provide 'whole-line-or-region-test)
