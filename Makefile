@@ -17,10 +17,10 @@ INIT_PACKAGES="(progn \
 all: compile package-lint test clean-elc
 
 package-lint:
-	${EMACS} -Q --eval $(subst PACKAGES,package-lint,${INIT_PACKAGES}) -batch -f package-lint-batch-and-exit whole-lint-or-region.el
+	${EMACS} -Q --eval $(subst PACKAGES,package-lint,${INIT_PACKAGES}) -batch -f package-lint-batch-and-exit whole-line-or-region.el
 
 test:
-	${EMACS} -Q --eval $(subst PACKAGES,${DEPS},${INIT_PACKAGES}) -batch -l whole-lint-or-region.el -l whole-lint-or-region-test.el -f ert-run-tests-batch-and-exit
+	${EMACS} -Q --eval $(subst PACKAGES,${DEPS},${INIT_PACKAGES}) -batch -l whole-line-or-region.el -l whole-line-or-region-test.el -f ert-run-tests-batch-and-exit
 
 compile: clean-elc
 	${EMACS} -Q --eval $(subst PACKAGES,${DEPS},${INIT_PACKAGES}) -L . -batch -f batch-byte-compile *.el
