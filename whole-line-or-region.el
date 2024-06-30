@@ -11,7 +11,7 @@
 ;; Created:         July 1, 2001
 ;; Keywords:        convenience wp
 ;; Package-Version: 0
-;; Package-Requires: ((emacs "24.1") (cl-lib "0.6"))
+;; Package-Requires: ((emacs "24.4"))
 ;; Homepage:  https://github.com/purcell/whole-line-or-region
 
 ;; This program is free software; you can redistribute it and/or modify
