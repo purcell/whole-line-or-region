@@ -77,5 +77,3 @@ Homepage: https://github.com/purcell/whole-line-or-region
 [💼 LinkedIn profile](https://uk.linkedin.com/in/stevepurcell)
 
 [✍ sanityinc.com](https://www.sanityinc.com/)
-
-[🐦 @sanityinc](https://twitter.com/sanityinc)
