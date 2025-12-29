@@ -64,6 +64,19 @@ If you're an Emacs 24 user or you have a recent version of
 [MELPA](http://melpa.org) repository. The version of
 `whole-line-or-region` there will always be up-to-date.
 
+## Inter-op with Embark
+
+This mode affects `delete-region` in a way that is probably surprising when used after `embark-act`, which binds `delete-region` to DEL by default.
+
+To fix that:
+
+```elisp
+(with-eval-after-load 'embark
+  (cl-pushnew 'embark--mark-target
+              (alist-get 'whole-line-or-region-delete-region
+                         embark-around-action-hooks)))
+```
+
 ## About
 
 Author: Steve Purcell <steve at sanityinc dot com>
